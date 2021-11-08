@@ -1,0 +1,87 @@
+\documentclass[E:/GsjzTle/main/main.tex]{subfiles}
+
+\begin{document}
+
+\begin{itemize}
+\item
+  \textbf{模型：}\(\sum_{i=1}^{n}\left\lfloor\frac{n}{i}\right\rfloor\)\\
+  假设 \(n = 8\)，那么可得：
+\end{itemize}
+
+\begin{longtable}[]{@{}lllllllll@{}}
+\toprule
+\(i\) & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 \\
+\midrule
+\endhead
+\(8/i\) & 8 & 4 & 2 & 2 & 1 & 1 & 1 & 1 \\
+\bottomrule
+\end{longtable}
+
+\begin{itemize}
+\item
+  \textbf{概念：}\\
+  表中同样的值会连续出现，而相同的值所划分的区间成为一个块。\\
+  整除的性质使得从 \(1\) 到 \(n\)
+  的表可根据数值划分为不同的块，且分块数远远小于 \(n\)。\\
+  利用这种性质，我们可以推导出每个分块具体的左右端点位置在哪，这样就可以快速求解出来了。\\
+  复杂度 \(O(\sqrt{n})\)
+\item
+  \textbf{推导：}\\
+  假设我们已知某一个分块的左端点 \(l\)，要求解出该分块的右端点 \(r\)。\\
+  设该分块的数值为\(k\)，对于该分块中的每个数\(i\)，有
+  \(k=\left\lfloor\frac{n}{i}\right\rfloor=\left\lfloor\frac{n}{l}\right]\)，即
+  \(i\times k \le n\)。\\
+  那么显然满足 \(i \times k \le n\) 成立的最大的 \(i\)
+  就是我们要的右端点 \(r\)。\\
+  于是可得：\(\left\{\begin{array}{l}k=\left\lfloor\frac{n}{l}\right\rfloor \\ r=\max (i), i \times k \leq n\end{array}\right.\)\\
+  推导得：\(r=\left\lfloor\frac{n}{k}\right\rfloor=\left\lfloor \frac{n}{\left\lfloor\frac{n}{l}\right\rfloor}\right\rfloor\)
+\item
+  \textbf{变形0：}\\
+  已知 \(n,m\)，求
+  \(\sum_{i=1}^{min(n,m)}\lfloor\frac{n}{ i}\rfloor\lfloor\frac{m}{i}\rfloor\)\\
+  \(\left\{\begin{array}{l}k1=\left\lfloor\frac{n}{l}\right\rfloor,k2= \left\lfloor\frac{m}{l}\right\rfloor\\ r=\max (i), i \times k1 \leq n,i\times k2 \le m\end{array}\right.\)\\
+  \(r = min(\lfloor\frac{n}{k1}\rfloor,\lfloor\frac{m}{k2}\rfloor)\)
+\item
+  \textbf{变形1：}
+
+  已知 \(n,a,b\)，求
+  \(\sum_{i=1}^{n}\left\lfloor\frac{n}{a i+b}\right\rfloor\)\\
+  令 \(i' = a\times i + b\)，先求出
+  \(\left\lfloor\frac{n}{i'}\right\rfloor\) 的整除分块\\
+  可得
+  \(k=\left\lfloor\frac{n}{a\times l+b}\right\rfloor\)，\(r'=\left\lfloor\frac{n}{k}\right\rfloor=\left\lfloor\frac{n}{\left\lfloor\frac{n}{a \times l + b}\right\rfloor}\right\rfloor\)\\
+  \(\left\{\begin{array}{l}i'=a\times i +b \\ r'=\max (i')\end{array}\right.\)→\(\begin{cases}a\times i=i'-b\\
+  i=\dfrac{i'-b}{a}\end{cases}\)→
+  \(r=max(i)= max(\left\lfloor\frac{i'-b}{a}\right\rfloor) = \lfloor\frac{r'-b}{a} \rfloor\)\\
+  \(r =\left \lfloor \dfrac{\left \lfloor \dfrac{n}{\lfloor \dfrac{n}{a\times l+b}\rfloor }\right \rfloor -b}{a}\right \rfloor \)
+\item
+  \textbf{变形2：}
+
+  做法同上。\\
+  已知 \(n\)，求
+  \(\sum_{i=1}^{n}\left\lfloor\frac{n}{i^2}\right\rfloor\)\\
+  令 \(i' = i^2\)，先求出 \(\left\lfloor\frac{n}{i'}\right\rfloor\)
+  的整除分块\\
+  可得
+  \(k=\left\lfloor\frac{n}{l^2}\right\rfloor\)，\(r'=\left\lfloor\frac{n}{k}\right\rfloor=\left\lfloor\frac{n}{\left\lfloor\frac{n}{l^2}\right\rfloor}\right\rfloor\)\\
+  \(\left\{\begin{array}{l}i=\sqrt{i'} \\ r'=\max (i')\end{array}\right.\)
+  →
+  \(r = max(i) = max(\lfloor\sqrt{i'} \rfloor) = \lfloor r' \rfloor = \lfloor\sqrt{\left\lfloor\frac{n}{\left\lfloor\frac{n}{l^2}\right\rfloor}\right\rfloor}\rfloor\)
+\item
+  \textbf{变形3：}\\
+  已知 \(n\)，求 \(\sum_{i=1}^{n}\left\lceil\frac{n}{i}\right\rceil\)\\
+  当 \(n\) 整除 \(i\)
+  时，\(\left\lceil\frac{n}{i}\right\rceil = \left\lfloor\frac{n}{i}\right\rfloor\)\\
+  当 \(n\) 不整除 \(i\)
+  时，\(\left\lceil\frac{n}{i}\right\rceil = \left\lfloor\frac{n}{i}\right\rfloor + 1\)\\
+  于是我们可以用 \(\lfloor \frac{n+i-1}{i}\rfloor \) 来代替
+  \(\lceil\frac{n}{i}\rceil\)\\
+  原式就转换为了 \(\sum_{i=1}^{n}\lfloor\frac{n+i -1}{i}\rfloor\)
+
+  那么有
+  \(\left\{\begin{array}{l}k=\left\lfloor\frac{n+l-1}{l}\right\rfloor \\ r=\max (i), i\times k \leq n+i-1 \end{array}\right.\)\\
+  \(\because i \times k \le n+i-1 \Rightarrow  i\times(k-1) \le n-1\)\\
+  \(\therefore r=\left\lfloor\frac{n-1}{k-1}\right\rfloor=\left[\frac{n-1}{\left\lfloor\frac{n+l-1}{l} \mid-1\right.}\right\rfloor\)
+\end{itemize}
+
+\end{document}

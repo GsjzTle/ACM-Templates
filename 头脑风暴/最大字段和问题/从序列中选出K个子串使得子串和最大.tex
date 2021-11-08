@@ -1,0 +1,130 @@
+\documentclass[E:/GsjzTle/main/main.tex]{subfiles}
+
+\begin{document}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \(dp\)，复杂度 \(O(N^2)\)\\
+  设\(f(i,j)\) 表示前\(i\)个选\(j\)段（\(i\)不一定选）的最大价值。
+
+  设\(g(i,j)\)表示前\(i\)个选\(j\)段（\(i\)一定要选）的最大价值。
+
+  对于\(g\)，讨论\(i-1\)选或不选。如果\(i-1\)选了，则\(i\)可以接上去，不用新增一段。
+
+  \(g(i,j)=max\{g(i-1,j),f(i-1,j-1)\}+a_i\)
+
+  对于\(f\)，讨论\(i\)选或不选。
+
+  \(f(i,j)=max\{g(i,j),f(i-1,j)\}\)
+
+  这样就可以做到\(O(n^2)\)的时间复杂度。因为第一维转移时只涉及到 \(i\)
+  和 \(i-1\)，所以可以把第一维省掉，空间复杂度\(O(n)\)。
+
+\begin{lstlisting}
+int n, m;
+std::cin >> n >> m;
+LL a[N];
+for (int i = 1; i <= n; i++)
+std::cin >> a[i];   
+LL f[N] = {0}, g[N] = {0};
+for (int i = 1; i <= n; i++) {
+	for (int j = m; j >= 1; j--) {
+		g[j] = std::max(g[j], f[j-1]) + a[i];
+		f[j] = std::max(g[j], f[j]);
+	}
+}
+std::cout << f[m] << std::endl;
+\end{lstlisting}
+\item
+  贪心\\
+  首先，可以发现，对于一段连续的正数或负数，要么全部选，要么全部不选。\\
+  所以，我们可以把连续的一段正数或负数缩成一个数。那么序列就变成了正负交替的。以下说明都针对缩完以后的序列。\\
+  设序列中正数的个数为\(cnt\)，则对于 \(m\ge cnt\)
+  的情况，最优解肯定是取所有正数。
+
+  考虑 \(m=cnt-1\) 的情况，此时我们需要从 \(m=cnt\) 的情况中减少一段。
+
+  有两种方法：一种是舍弃一个正数，另一种是取一个负数，使两边的正数合并成一段。
+
+  怎么取最优？若舍弃正数\(a\)，会损失 \(a\)
+  的价值。若取负数\(a\)，会损失\(-a\)的价值。
+
+  统一起来，就是若舍弃/取走数字\(a\)，会损失\(\mid a\mid\)的价值。这样，我们只要找绝对值最小的数舍弃/取走即可。
+
+  舍弃/取走一个数后，序列会变成什么样呢？
+
+  事实上，舍弃/取走一个数\(a_i\)，相当于与两边的数合并，合并完的值是\(a_{i-1}+a_i+a_{i+1}\)
+
+  例如\(1,-2,3,-4,5\)，若舍弃\(3\)，则序列变成\(1,-3,5\)；若取走\(-4\)，则序列变成\(1,-2,4\)。
+
+  可以发现，若取绝对值最小的数，合并完以后的序列还是正负交替。于是我们可以用刚才的方法继续获得\(m=cnt-2,cnt-3,\dots\)的答案，直至\(m\)达到题目的要求。
+
+  取绝对值最小的数，可以用优先队列做。合并节点可以使用链表。答案为最后合并完的序列的所有正数之和。
+
+  复杂度：合并\(O(n)\)次，每次\(O(\log n)\) ，总复杂度\(O(n\log n)\)
+
+\begin{lstlisting}
+struct Data {
+	LL val;
+	int pos, tim;
+	
+	bool operator < (const Data &t) const {
+		return val > t.val;
+	}
+};
+int pl[N], pr[N];
+int tim[N] = {0};
+void del(int u) {
+	if (u == 0) return;
+	pr[pl[u]] = pr[u];
+	pl[pr[u]] = pl[u];
+	tim[u] = -1;
+}
+int main() {
+	std::ios::sync_with_stdio(false);
+	int n, m;
+	std::cin >> n >> m;
+	static LL a[N] = {0};
+	int top = 0;
+	for (int i = 1; i <= n; i++) {
+		LL r; std::cin >> r;
+		if (r == 0) continue;
+		if (top == 0) {
+			if (r > 0) a[++top] = r;
+			continue;
+		}
+		if (a[top] > 0 == r > 0) a[top] += r;
+		else a[++top] = r;
+	}
+	if (top > 0 && a[top] < 0) top--;   
+	for (int i = 0; i <= top; i++) {
+		pl[i] = i == 0 ? top : i - 1;
+		pr[i] = i == top ? 0 : i + 1;
+	}
+	std::priority_queue<Data> q;
+	for (int i = 1; i <= top; i++) {
+		q.push({ std::abs(a[i]), i, 0 });
+	}   
+	for (int cnt = top + 1 >> 1; cnt > m; cnt--) {
+		Data d = q.top(); q.pop();
+		while (tim[d.pos] != d.tim) {
+			d = q.top(); q.pop();
+		}
+		int u = d.pos, l = pl[u], r = pr[u];
+		a[u] += a[l] + a[r];
+		if (l != 0 && r != 0)
+		q.push({ std::abs(a[u]), u, ++tim[u] });
+		else del(u);
+		del(l); del(r);
+	} 
+	LL ans = 0;
+	for (int i = pr[0]; i != 0; i = pr[i])
+	if (a[i] > 0) ans += a[i];
+	std::cout << ans << std::endl;
+	return 0;
+}
+\end{lstlisting}
+\end{enumerate}
+
+\end{document}

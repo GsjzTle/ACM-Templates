@@ -1,0 +1,47 @@
+\documentclass[E:/GsjzTle/main/main.tex]{subfiles}
+
+\begin{document}
+题意：
+\begin{itemize}
+\item
+  给定一个长度为 \(N\) 的序列 \(A\) 和 \(K\)
+\item
+  满足 \(\forall i \in[1 , N],A[i] <= K\)
+\item
+  现要求选择一个长度为 \(K\) 的子序列
+\item
+  使得这个子序列是一个排列且字典序最小
+\end{itemize}
+思路：
+\begin{quote}
+我们按顺序从前往后在这 \(N\) 个数之中选 \(K\) 个数出来
+
+一个自然的想法：
+
+每次尽量选取字典序最小的数，让较大的数在答案序列中尽量靠后
+
+我们可以用类似单调队列的思想去实现:
+
+用 \(ans[]\) 存储答案，当枚举到第 \(i\) 个数 \(A[i]\) 的时候，
+
+若 \(ans[]\) 之中没有 \(A[i]\) 时,将其与 \(ans[]\) 的最后一位 \(B\)
+做比较
+
+如果 \(A[i] < b\) 且 \(A[i]\) 之后还有那么删去 \(B\)，接着比较，直到在
+\(ans[]\) 中找到不满足条件的数为止
+
+此时插入 \(A[i]\)，枚举下一个数
+\end{quote}
+
+\begin{lstlisting}
+rep(i , 1 , n) 
+{
+  if(vis[a[i]]) continue ;
+  while(deq.size() && a[deq.back()] > a[i] && last[a[deq.back()]] > i) vis[a[deq.back()]] = 0 , deq.pop_back();   
+  deq.pb(i);
+  vis[a[i]] = 1;	
+}
+for(auto i : deq) cout << a[i] << " ";
+\end{lstlisting}
+
+\end{document}

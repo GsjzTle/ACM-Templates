@@ -1,0 +1,83 @@
+#include <bits/stdc++.h>
+#define ll long long
+using namespace std;
+ll pow_mod(ll x, ll n, ll mod)
+{
+    ll res = 1;
+    while (n)
+    {
+        if (n & 1)
+            res = res * x % mod;
+        x = x * x % mod;
+        n >>= 1;
+    }
+    return res;
+}
+void exgcd(ll a, ll b, ll &x, ll &y)
+{
+    if (!b)
+    {
+        x = 1, y = 0;
+        return;
+    }
+    exgcd(b, a % b, x, y);
+    ll t = x;
+    x = y, y = t - (a / b) * y;
+}
+ll inv(ll a, ll b)
+{
+    ll x, y;
+    return exgcd(a, b, x, y), (x % b + b) % b;
+}
+ll crt(ll x, ll p, ll mod)
+{
+    return inv(p / mod, mod) * (p / mod) * x;
+}
+ll fac(ll x, ll a, ll b)
+{
+    if (!x)
+        return (1);
+    ll ans = 1;
+    for (ll i = 1; i <= b; i++)
+        if (i % a)
+            ans *= i, ans %= b;
+    ans = pow_mod(ans, x / b, b);
+    for (ll i = 1; i <= x % b; i++)
+        if (i % a)
+            ans *= i, ans %= b;
+    return (ans * fac(x / a, a, b) % b);
+}
+ll C(ll n, ll m, ll a, ll b)
+{
+    ll N = fac(n, a, b), M = fac(m, a, b), Z = fac(n - m, a, b), sum = 0, i;
+    for (i = n; i; i = i / a)
+        sum += i / a;
+    for (i = m; i; i = i / a)
+        sum -= i / a;
+    for (i = n - m; i; i = i / a)
+        sum -= i / a;
+    return (N * pow_mod(a, sum, b) % b * inv(M, b) % b * inv(Z, b) % b);
+}
+ll exlucas(ll n, ll m, ll p)
+{
+    ll t = p, ans = 0, i;
+    for (i = 2; i * i <= p; i++)
+    {
+        ll k = 1;
+        while (t % i == 0)
+        {
+            k *= i, t /= i;
+        }
+        ans += crt(C(n, m, i, k), p, k), ans %= p;
+    }
+    if (t > 1)
+        ans += crt(C(n, m, t, t), p, t), ans %= p;
+    return (ans % p);
+}
+signed main()
+{
+    ll n, m, p;
+    cin >> n >> m >> p;
+    cout << exlucas(n, m, p) << '\n';
+    return (0);
+}

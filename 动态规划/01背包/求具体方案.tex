@@ -1,0 +1,48 @@
+\documentclass[E:/GsjzTle/main/main.tex]{subfiles}
+\begin{document}
+
+\begin{itemize}
+\item
+  \(01\) 背包的最优解为 \(dp[N][V]\)
+\item
+  其含义为前 \(N\) 个物品，体积为 \(V\) 的最优解
+\item
+  当 \(dp[N][V] = dp[N - 1][V]\) 时，第 \(N\) 个物品未选
+\item
+  当 \(dp[N][V] = dp[N - 1][V - w[i]] + v[i]\) 时，第 \(N\) 个物品选了
+\end{itemize}
+
+\begin{quote}
+当要求字典序最小的方案数时\\
+若存在一个包含第 \(1\) 个物品的最优解\\
+为了确保字典序最小那么我们必然要选第一个\\
+那么之后问题就转化成从 \(2\)～\(N\) 这些物品中找到最优解\\
+而之前的 \(dp(i,j)\) 记录的都是前 \(i\) 个物品总容量为 \(j\) 的最优解\\
+所以现在需要将 \(dp(i,j)\) 定义为从第 \(i\) 个元素到最后一个元素总容量为
+\(j\) 的最优解\\
+然后模拟一遍即可
+\end{quote}
+
+\begin{lstlisting}
+cin >> n >> V;
+rep(i , 1 , n) cin >> w[i] >> v[i];
+per(i , n , 1)
+{
+	rep(j , 0 , V)
+	{
+		dp[i][j] = dp[i + 1][j];
+		if(j - w[i] >= 0) dp[i][j] = max(dp[i + 1][j] , dp[i + 1][j - w[i]] + v[i]);
+	}	
+}
+int m = V;
+rep(i , 1 , n)
+{
+	if(m - w[i] >= 0 && dp[i][m] == dp[i + 1][m - w[i]] + v[i])
+	{
+		ans.push_back(i) , m -= w[i];
+	}
+}
+for(auto i : ans) cout << i << " ";
+\end{lstlisting}
+
+\end{document}

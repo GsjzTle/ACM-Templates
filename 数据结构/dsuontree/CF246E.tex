@@ -1,0 +1,112 @@
+\documentclass[E:/GsjzTle/main/main.tex]{subfiles}
+
+\begin{document}
+
+\textbf{题目大意}
+
+\begin{quote}
+给定一片森林，每次询问一个节点的\(K-Son\)共有个多少不同的名字。一个节点的\(K-Son\)即为深度是该节点深度加\(K\)的节点。
+\end{quote}
+
+\textbf{解题思路}
+
+\begin{quote}
+比较裸的 dsu on tree
+
+统计不同名字开个 \(map<string , int>\) 即可
+
+也可以将字符串离散成数字再操作
+\end{quote}
+
+\begin{lstlisting}
+const int N = 5e5 + 10;
+struct Edge{
+	int nex , to;
+}edge[N << 1];
+int head[N] , tot;
+int a[N] , dep[N] , siz[N] , hson[N] , name[N] , HH;
+vector<pair<int , int>>Q[N] , ans;
+unordered_map<int , int>cnt[N] , sum;
+void add_edge(int u , int v)
+{
+	edge[++ tot].nex = head[u];
+	edge[tot].to = v;
+	head[u] = tot;
+}
+void dfs(int u , int far)
+{
+	siz[u] = 1;
+	dep[u] = dep[far] + 1;
+	for(int i = head[u] ; i ; i = edge[i].nex)
+	{
+		int v = edge[i].to;
+		if(v == far) continue ;		
+		dfs(v , u);
+		siz[u] += siz[v];
+		if(siz[v] > siz[hson[u]]) hson[u] = v;
+	}
+} 
+void calc(int u , int far , int val , int dep)
+{
+	cnt[dep][name[u]] += val;
+	if(cnt[dep][name[u]] == 1 && val == 1) sum[dep] ++ ;
+	if(!cnt[dep][name[u]]) sum[dep] -- ;
+	for(int i = head[u] ; i ; i = edge[i].nex)
+	{
+		int v = edge[i].to;
+		if(v == far || v == HH) continue ;
+		calc(v , u , val , dep + 1);
+	}
+}
+void dsu(int u , int far, int op , int dep)
+{
+	for(int i = head[u] ; i ; i = edge[i].nex)
+	{
+		int v = edge[i].to;
+		if(v == far || v == hson[u]) continue ;
+		dsu(v , u , 0 , dep + 1);
+	}
+	if(hson[u]) dsu(hson[u] , u , 1 , dep + 1) , HH = hson[u];
+	calc(u , far , 1 , dep);
+	for(auto i : Q[u])
+	{
+		int k = i.fi , id = i.se;
+		ans.pb(make_pair(id , sum[dep + k]));
+	}
+	HH = 0;
+	if(!op) calc(u , far , -1 , dep) , sum.clear();
+}
+map<string , int>vis;
+signed main()
+{
+	int n , q , tot = 0;
+	cin >> n;
+	rep(i , 1 , n)
+	{
+		string s;
+		int x;
+		cin >> s >> x;
+		if(!vis.count(s)) vis[s] = ++ tot;
+		name[i] = vis[s] , a[i] = x;
+		if(!x) continue ;
+		add_edge(i , x) , add_edge(x , i);
+	}
+	rep(i , 1 , n) if(!a[i]) dfs(i , 0);
+	cin >> q;
+	rep(i , 1 , q)
+	{
+		int a , b;
+		cin >> a >> b;
+		Q[a].pb(make_pair(b , i));
+	}
+	rep(i , 1 , n)
+	{
+		if(!a[i]) dsu(i , 0 , 0 , 1) ;
+	}
+	sort(ans.begin() , ans.end());
+	for(auto i : ans) cout << i.se << '\n';
+	return 0;
+}
+\end{lstlisting}
+
+\end{document}

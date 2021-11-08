@@ -1,0 +1,38 @@
++ $dp[V][K]$ 表示前 $N$ 个物品，背包容量为 $V$ 的第 $K$ 优解
++ 复杂度 $O(NVK)$
+
+```text
+int w[N] , v[N];
+int dp[N][K] , ma1[N] , ma2[N];
+signed main()
+{
+	rep(i , 0 , N - 10) rep(j , 0 , N - 10) dp[i][j] = -inf;
+	int n , V , K;
+	cin >> K >> V >> n;
+	dp[0][1] = 0; 
+	rep(i , 1 , n) cin >> w[i] >> v[i];
+	rep(i , 1 , n)
+	{
+		per(j , V , w[i])
+		{
+			rep(k , 1 , K)
+			{
+				ma1[k] = dp[j][k];
+				ma2[k] = dp[j - w[i]][k] + v[i];	
+			} 
+			int cnt = 0 , c1 = 1 , c2 = 1;
+			while(cnt < K)
+			{
+				if(ma1[c1] >= ma2[c2]) dp[j][++ cnt] = ma1[c1 ++];
+				else dp[j][++ cnt] = ma2[c2 ++];  
+			}
+		}
+	}
+	int ans = 0;
+	rep(k , 1 , K) ans += dp[V][k];
+	if(ans < 0) ans = 0;
+	cout << ans << '\n';
+	return 0;
+}
+```
+

@@ -1,0 +1,90 @@
+\documentclass[E:/GsjzTle/main/main.tex]{subfiles}
+
+\begin{document}
+
+\textbf{题目大意}
+
+\begin{quote}
+给定一棵以 \(1\) 为根，\(n\) 个节点的树。设\(d(u,x)\) 为 \(u\) 子树中到
+\(u\) 距离为 \(x\) 的节点数。
+
+对于每个点，求一个最小的 \(k\)，使得 \(d(u,k)\) 最大。
+\end{quote}
+
+\textbf{解题思路}
+
+\begin{quote}
+记录子树每个深度的节点的个数，然后取个最大节点个数的最小深度即可
+\end{quote}
+
+\begin{lstlisting}
+const int N = 1e6 + 10;
+struct Edge{
+	int nex , to;
+}edge[N << 1];
+int head[N] , tot;
+int a[N] , dep[N] , siz[N] , hson[N] , HH;
+int ans[N] , cnt[N] , ma , res;
+void add_edge(int u , int v)
+{
+	edge[++ tot].nex = head[u];
+	edge[tot].to = v;
+	head[u] = tot;
+}
+void dfs(int u , int far)
+{
+	siz[u] = 1;
+	dep[u] = dep[far] + 1;
+	for(int i = head[u] ; i ; i = edge[i].nex)
+	{
+		int v = edge[i].to;
+		if(v == far) continue ;		
+		dfs(v , u);
+		siz[u] += siz[v];
+		if(siz[v] > siz[hson[u]]) hson[u] = v;
+	}
+} 
+void calc(int u , int far , int val , int dep)
+{
+	cnt[dep] += val;
+	if(cnt[dep] > ma) ma = cnt[dep] , res = dep;
+	else if(cnt[dep] == ma) res = min(res , dep);
+	for(int i = head[u] ; i ; i = edge[i].nex)
+	{
+		int v = edge[i].to;
+		if(v == far || v == HH) continue ;
+		calc(v , u , val , dep + 1);
+	}
+}
+void dsu(int u , int far, int op , int dep)
+{
+	for(int i = head[u] ; i ; i = edge[i].nex)
+	{
+		int v = edge[i].to;
+		if(v == far || v == hson[u]) continue ;
+		dsu(v , u , 0 , dep + 1);
+	}
+	if(hson[u]) dsu(hson[u] , u , 1 , dep + 1) , HH = hson[u];
+	calc(u , far , 1 , dep);
+	HH = 0;
+	ans[u] = res - dep;
+	if(!op) calc(u , far , -1 , dep) , ma = 0 , res = 0;
+}
+signed main()
+{
+	int n , q , tot = 0;
+	cin >> n;
+	rep(i , 1 , n - 1)
+	{
+		int u , v;
+		cin >> u >> v;
+		add_edge(u , v) , add_edge(v , u);	
+	} 
+	dfs(1 , 0);
+	dsu(1 , 0 , 0 , 0);
+	rep(i , 1 , n) cout << ans[i] << '\n';
+	return 0;
+}
+\end{lstlisting}
+
+\end{document}

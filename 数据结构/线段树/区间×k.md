@@ -1,0 +1,143 @@
+- 将区间 $[L,R]$ 内每个数乘上 $k$ 
+- 将区间 $[L,R]$ 内每个数加上 $k$ 
+- 输出区间 $[L,R]$ 内每个数的和对 $mod$ 取模所得的结果
+
+```text
+#include <bits/stdc++.h>
+
+#define ll long long
+
+using namespace std;
+
+const int N = 1e5 + 10;
+
+int n, m, mod;
+int a[N];
+
+struct Segment_Tree
+{
+	ll sum, add, mul;
+	int l, r;
+} tree[N << 2];
+
+void push_up(int rt)
+{
+	tree[rt].sum = (tree[rt << 1].sum + tree[rt << 1 | 1].sum) % mod;
+}
+void push_down(int rt)  
+{
+	tree[rt << 1].sum = (tree[rt << 1].sum * tree[rt].mul + tree[rt].add * (tree[rt << 1].r - tree[rt << 1].l + 1)) % mod;
+	tree[rt << 1 | 1].sum = (tree[rt << 1 | 1].sum * tree[rt].mul + tree[rt].add * (tree[rt << 1 | 1].r - tree[rt << 1 | 1].l + 1)) % mod;
+	tree[rt << 1].mul = (tree[rt << 1].mul * tree[rt].mul) % mod;
+	tree[rt << 1 | 1].mul = (tree[rt << 1 | 1].mul * tree[rt].mul) % mod;
+	tree[rt << 1].add = (tree[rt << 1].add * tree[rt].mul + tree[rt].add) % mod;
+	tree[rt << 1 | 1].add = (tree[rt << 1 | 1].add * tree[rt].mul + tree[rt].add) % mod;
+	tree[rt].add = 0;
+	tree[rt].mul = 1;
+	return;
+}
+
+void build(int rt, int l, int r , int *a)  
+{
+	tree[rt].l = l , tree[rt].r = r;
+	tree[rt].mul = 1;
+	if (l == r)
+	{
+		tree[rt].sum = a[l] % mod;
+		return;
+	}
+	int mid = (l + r) >> 1;
+	build(rt << 1, l, mid , a);
+	build(rt << 1 | 1, mid + 1, r , a);
+	push_up(rt);
+	return;
+}
+
+void update_Mul(int rt, int L, int R, int k) 
+{
+	if (L <= tree[rt].l && tree[rt].r <= R)
+	{
+		tree[rt].add = (tree[rt].add * k) % mod;
+		tree[rt].mul = (tree[rt].mul * k) % mod;
+		tree[rt].sum = (tree[rt].sum * k) % mod;
+		return;
+	}
+
+	push_down(rt);
+	int mid = (tree[rt].l + tree[rt].r) >> 1;
+	if (L <= mid) update_Mul(rt << 1, L, R, k);
+	if (R > mid) update_Mul(rt << 1 | 1, L, R, k);
+	push_up(rt);
+
+	return;
+}
+
+void update_Add(int rt, int L, int R, int k)  
+{
+	if (L <= tree[rt].l && tree[rt].r <= R)
+	{
+		tree[rt].add = (tree[rt].add + k) % mod;
+		tree[rt].sum = (tree[rt].sum + k * (tree[rt].r - tree[rt].l + 1)) % mod;
+		return;
+	}
+
+	push_down(rt);
+	int mid = (tree[rt].l + tree[rt].r) >> 1;
+	if (L <= mid) update_Add(rt << 1, L, R, k);
+	if (R > mid) update_Add(rt << 1 | 1, L, R, k);
+	push_up(rt);
+
+	return;
+}
+
+ll query_range(int rt, int L, int R) 
+{
+	if (L <= tree[rt].l && tree[rt].r <= R) return tree[rt].sum;
+	push_down(rt);
+	ll val = 0;
+	int mid = (tree[rt].l + tree[rt].r) >> 1;
+	if (L <= mid) val = (val + query_range(rt << 1, L, R)) % mod;
+	if (R > mid) val = (val + query_range(rt << 1 | 1, L, R)) % mod;
+
+	return val;
+}
+
+int main()
+{
+	cin >> n >> m >> mod;
+
+	for (int i = 1; i <= n; i++) cin >> a[i];
+
+	build(1, 1, n, a);
+
+	for (int i = 1; i <= m; i++)
+	{
+		int op , l , r;
+		
+		cin >> op >> l >> r;
+		
+		if(op == 1)
+		{
+			int k;
+			
+			cin >> k;
+			
+			update_Mul(1, l, r, k);
+		}
+
+		if(op == 2)
+		{
+			int k;
+			
+			cin >> k;
+			
+			update_Add(1, l, r, k);
+		}
+
+		if (op == 3) cout << query_range(1 , l , r) << '\n';
+	
+	}
+	return 0;
+}
+```
+

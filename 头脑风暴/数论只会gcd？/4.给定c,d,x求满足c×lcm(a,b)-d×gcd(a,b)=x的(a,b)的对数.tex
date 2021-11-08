@@ -1,0 +1,70 @@
+\documentclass[E:/GsjzTle/main/main.tex]{subfiles}
+\begin{document}
+
+\(c\times lcm(a,b) - d\times gcd(a , b) = x\)\\
+\(c\times \dfrac{a \times b}{gcd(a,b)} - d\times gcd(a , b) = x\)\\
+\(c \times a\times b - d\times gcd(a , b)^2 = x \times gcd(a,b)\)\\
+\(c \times a\times b = x \times gcd(a,b) + d\times gcd(a , b)^2\)\\
+\(c \times \dfrac{a}{gcd(a,b)}\times \dfrac{b}{gcd(a,b)} = \dfrac{x}{gcd(a,b)} + d\)\\
+因为 \(c \times \dfrac{a}{gcd(a,b)}\times \dfrac{b}{gcd(a,b)}\)
+为整数，\(d\) 为整数\\
+所以 \(\dfrac{x}{gcd(a,b)}\) 为整数，所以 \(gcd(a,b)\) 为 \(x\) 的因子\\
+于是 \(gcd(a,b)\) 我们可以在 \(\sqrt{x}\) 的复杂度内枚举\\
+定义 \(A = \dfrac{a}{gcd(a,b)} , B = \dfrac{b}{gcd(a,b)}\)\\
+那么有 \(gcd(A , B) =1\)
+，\(A \times B = \dfrac{\dfrac{x}{gcd(a,b)} + d}{c}\)\\
+定义 \(R =  {\dfrac{x}{gcd(a,b)} + d}\)\\
+因为 \(A \times B\) 为整数，所以 \(R\) 要满足 \(R\bmod c = 0\)\\
+于是问题就转换成 有多少对 \(A,B\) 满足
+\(\begin{cases}\gcd \left( A,B\right) =1\\
+A\times B=R\end{cases}\)\\
+对于 \(A \times B= R\)，只要将 \(R\) 的质因子分配给 \(A\) 或 \(B\) 即可
+\\
+对于 \(gcd(A , B) = 1\)，只要将 \(R\) 的某个质因子全部分给 \(A\)
+或者全部分给 \(B\) 即可\\
+那么 \(R\) 的贡献就是 \(2^{p_{cnt}}\) ，其中 \(p_{cnt}\) 表示 \(R\)
+的质因子个数
+
+\begin{lstlisting}
+const int M = 2e7 + 10;
+int cnt[M];
+signed main()
+{
+	int T , up = 2e7;
+	for(int i = 2 ; i <= up ; i ++)
+	{
+		if(cnt[i]) continue ;
+		for(int j = i ; j <= up ; j += i) cnt[j] ++ ;
+	}
+	cin >> T;
+	while(T --)
+	{
+		int c , d , x , res = 0;	
+		cin >> c >> d >> x;
+		for(int i = 1 ; i * i <= x ; i ++)
+		{
+			if(x % i == 0)
+			{
+				int R = x / i + d;
+				if(R % c == 0)
+				{
+					R /= c;
+					res += 1ll << cnt[R];	
+				} 	
+				int j = x / i;			
+				if(j == i) continue ;			
+				R = x / j + d;			
+				if(R % c == 0)
+				{
+					R /= c;			
+					res += 1ll << cnt[R];
+				}
+			}
+		}	
+		cout << res << '\n';
+	}
+	return 0;
+}
+\end{lstlisting}
+
+\end{document}

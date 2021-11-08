@@ -1,0 +1,32 @@
+\documentclass[E:/GsjzTle/main/main.tex]{subfiles}
+
+\begin{document}
+
+\begin{itemize}
+\item
+  启发式合并其实就是按秩合并的一种
+\item
+  不过它是按集合大小来的
+\end{itemize}
+
+\begin{lstlisting}
+int far[N] , size[N];
+int find(int x)
+{
+	if(x == far[x]) return x;
+	return far[x] = find(far[x]); // 改为 return find(far[x]) 则去掉了路径压缩
+}
+void Union(int x , int y)
+{
+	int tx = find(x) , ty = find(y);
+	if(tx == ty) return ; 
+	if(size[tx] > size[ty]) swap(tx , ty);
+	far[tx] = ty , size[ty] += size[tx];
+}
+void init(int n)
+{
+	for(int i = 1 ; i <= n ; i ++) far[i] = i , size[i] = 1;
+}
+\end{lstlisting}
+
+\end{document}

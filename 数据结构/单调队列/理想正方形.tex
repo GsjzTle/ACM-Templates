@@ -1,0 +1,67 @@
+\documentclass[E:/GsjzTle/main/main.tex]{subfiles}
+
+\begin{document}
+
+\begin{itemize}
+\item
+  有一个 \(a \times b\) 的整数组成的矩阵，现请你从中找出一个
+  \(n\times n\)
+  的正方形区域，使得该区域所有数中的最大值和最小值的差最小。
+\item
+  先对每行跑一遍单调队列，用 \(ma[i][j]\) 记录第 \(i\) 行，\([i-n,i]\)
+  的最大值\\
+  然后用 \(ma[i][j]\) 对每列跑一遍单调队列即可
+\end{itemize}
+
+\begin{lstlisting}
+const int N = 1e3 + 10;
+int A , B , n , a[N][N];
+deque<int>que;
+int ma[N][N] , mi[N][N];
+void get_min(int mi[] , int a[] , int A)
+{
+	que.clear();
+	for(int i = 1 ; i <= A ; i ++)
+	{
+		if(!que.empty() && que.front() <= i - n) que.pop_front();
+		while(!que.empty() && a[que.back()] >= a[i]) que.pop_back();
+		que.push_back(i);
+		mi[i] = a[que.front()];
+	}
+}
+void get_max(int ma[] , int a[] , int A)
+{
+	que.clear();
+	for(int i = 1 ; i <= A ; i ++)
+	{
+		if(!que.empty() && que.front() <= i - n) que.pop_front();
+		while(!que.empty() && a[que.back()] <= a[i]) que.pop_back();
+		que.push_back(i);
+		ma[i] = a[que.front()];
+	}
+}
+int b[N] , c[N];
+int ra[N][N] , ri[N][N]; 
+signed main()
+{
+	cin >> A >> B >> n; 
+	for(int i = 1 ; i <= A ; i ++) for(int j = 1 ; j <= B ; j ++) cin >> a[i][j];
+	for(int i = 1 ; i <= A ; i ++)
+	{
+		get_max(ma[i] , a[i] , B);
+		get_min(mi[i] , a[i] , B); 
+	}
+	int res = 0x3f3f3f3f;
+	for(int j = n ; j <= B ; j ++)
+	{
+		for(int i = 1 ; i <= A ; i ++) b[i] = ma[i][j] , c[i] = mi[i][j];
+		get_max(ra[j] , b , A);
+		get_min(ri[j] , c , A);
+		for(int i = n ; i <= A ; i ++) res = min(res , ra[j][i] - ri[j][i]);
+	}
+	cout << res << '\n';
+	return 0;
+}
+\end{lstlisting}
+
+\end{document}

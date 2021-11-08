@@ -1,0 +1,248 @@
+\documentclass[E:/GsjzTle/main/main.tex]{subfiles}
+
+\begin{document}
+
+支持以下 \(6\) 种操作：
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \(INSERT(pos , tot)\)，在当前数列的第 \(pos\) 个数字后插入 \(tot\)
+  个数字：\(c_1, c_2 \cdots c_{tot}\)
+\item
+  \(DELETE(pos , tot)\)， 从当前数列的第 \(pos\) 个数字开始连续删除
+  \(tot\) 个数字
+\item
+  \(UPDATE(pos,tot,y)\)，从当前数列的第 \(pos\) 个数字开始的连续 \(tot\)
+  个数字统一修改为 \(y\)
+\item
+  \(REVERSE(pos,tot)\)，取出从当前数列的第 \(pos\) 个数字开始的 \(tot\)
+  个数字，翻转后放入原来的位置
+\item
+  \(QUERY(pos,tot)\)，计算从当前数列的第 \(pos\) 个数字开始的 \(tot\)
+  个数字的和并输出
+\item
+  \(tree[root].mid\)，求出当前数列中和最大的一段子串，并输出最大和
+\end{enumerate}
+
+\begin{lstlisting}
+#include <bits/stdc++.h>
+#define L(node) (tree[node].ch[0])			  //替左儿子
+#define R(node) (tree[node].ch[1])			  //替右儿子
+#define F(node) (tree[node].fa)				  //替父亲
+#define V(node) (tree[node].val)			  //替权值
+#define S(node) (tree[node].size)			  //替子树大小
+#define compare(node, x) (tree[node].val < x) //比较node是权值x的左儿子还是右儿子
+using namespace std;
+const int N = 1e6 + 10 , inf = 1e8 + 1 , TAGNONE = 1e7 + 1;
+int root, cnt, a[N], id[N], rub[N], top, n, m;
+struct Splay
+{
+	int ch[2];	//左右儿子
+	int size;	//子树大小
+	int fa;		//父亲
+	int tag;	//赋值标记
+	int val;	//权值
+	int rev;	//翻转标记
+	int sum;	//区间权值和
+	int l;	//左区间，指区间最大前缀和
+	int r;	//右区间，指区间最大后缀和
+	int mid; //中区间，指区间最大子段和
+	void clear()
+	{
+		ch[0] = ch[1] = fa = rev = 0; //清空节点信息
+		tag = TAGNONE;
+	}
+} tree[N];
+int rublish() //垃圾回收
+{
+	if(top == 0) return ++ cnt;
+	int node = rub[top --];
+	return node;
+}
+void change_val(int node, int val) //更新点值
+{
+	if(!node) return;											 //空节点返回
+	tree[node].tag = tree[node].val = val;						 //打赋值标记，更新权值
+	tree[node].sum = val * tree[node].size;						 //更新区间权值和
+	tree[node].l = tree[node].r = max(tree[node].sum, 0); //左右区间更新
+	tree[node].mid = max(tree[node].sum, val);				 //最大子段和更新
+}
+void change_rev(int node) //更新翻转
+{
+	swap(tree[node].ch[0], tree[node].ch[1]); //交换左右儿子
+	swap(tree[node].l, tree[node].r);  //交换左右区间
+	tree[node].rev ^= 1;					  //打翻转标记
+}
+void pushup(int node) //维护信息
+{
+	Splay &x = tree[L(node)], &y = tree[R(node)];
+	int val = tree[node].val; //实质是将左右儿子合并，x代替左儿子，y代替右儿子
+	Splay &res = tree[node];	  //res代替tree[node]
+	res.sum = x.sum + y.sum + val;
+	res.size = x.size + y.size + 1;									   //权值和更新，子树大小更新
+	res.mid = max(max(x.mid, y.mid), x.r + y.l + val); //最大子段和更新
+	res.l = max(x.l, x.sum + y.l + val);					   //区间最大前缀和更新
+	res.r = max(y.r, y.sum + x.r + val);				   //区间最大后缀和更新
+}
+void pushdown(int node) //标记下传
+{
+	if(tree[node].tag != TAGNONE) //判断有没有赋值标记
+	{
+		change_val(L(node), tree[node].tag); //更新左儿子
+		change_val(R(node), tree[node].tag); //更新右儿子
+		tree[node].tag = TAGNONE;			 //除去标记
+	}
+	if(tree[node].rev) //判断有没有翻转标记
+	{
+		change_rev(L(node)); //更新左儿子
+		change_rev(R(node)); //更新右儿子
+		tree[node].rev = 0;	 //除去标记
+	}
+}
+void rotate(int node) //rotate 模板
+{
+	int fa = F(node);
+	int gfa = F(fa);
+	int z = tree[fa].ch[1] == node;
+	tree[gfa].ch[tree[gfa].ch[1] == fa] = node;
+	tree[node].fa = gfa;
+	tree[fa].ch[z] = tree[node].ch[z ^ 1];
+	tree[tree[node].ch[z ^ 1]].fa = fa;
+	tree[node].ch[z ^ 1] = fa;
+	tree[fa].fa = node;
+	pushup(fa);
+	pushup(node);
+}
+void Splay(int node, int goal) //Splay 模板
+{
+	while(tree[node].fa != goal)
+	{
+		int fa = F(node);
+		int gfa = F(fa);
+		if(gfa != goal) (compare(fa, tree[node].val)) != (compare(gfa, tree[fa].val)) ? rotate(node) : rotate(fa);
+		rotate(node);
+	}
+	if(!goal) root = node;
+}
+void New(int node, int x) //新建节点
+{
+	tree[node].mid = tree[node].sum = x; //赋值信息
+	tree[node].tag = TAGNONE;
+	tree[node].rev = 0;								//标记初始化
+	tree[node].l = tree[node].r = max(x, 0); //区间赋值
+	tree[node].size = 1;							//大小赋值
+}
+void build(int begin, int end, int fa) //建树
+{
+	int mid = (begin + end) >> 1;
+	int node = id[mid], pre = id[fa];
+	if(begin == end) New(node, a[begin]); //到达底部，新建一个节点
+	if(begin < mid) build(begin, mid - 1, mid); //建左子树
+	if(mid < end) build(mid + 1, end, mid); //建右子树
+	tree[node].val = a[mid];
+	tree[node].fa = pre;
+	tree[node].tag = TAGNONE; //基本信息赋值
+	pushup(node);			  //维护信息
+	tree[pre].ch[mid >= fa] = node;
+}
+int kth(int x) //kth模板
+{
+	int node = root;
+	while (1)
+	{
+		pushdown(node);
+		if(tree[L(node)].size >= x) node = L(node);
+		else if(tree[L(node)].size + 1 == x) return node;
+		else x -= tree[L(node)].size + 1, node = R(node);
+	}
+}
+void remove(int node) //将一个子树清空
+{
+	if (L(node)) remove(L(node)); //继续清空左子树
+	if (R(node)) remove(R(node)); //继续清空右子树
+	rub[++top] = node;
+	tree[node].clear(); //清空并仍进垃圾桶
+}
+int split(int k, int len) //找到那个区间的位置
+{
+	int x = kth(k), y = kth(k + len + 1);
+	Splay(x, 0);
+	Splay(y, x);
+	return L(y);
+}
+int query(int x, int len) //查询区间权值和
+{
+	int node = split(x, len);		//找到该区间
+	return tree[node].sum; 			//返回答案
+}
+void update(int x, int len, int val) //更新区间的指
+{
+	int node = split(x, len), y = F(node); //找到该区间
+	change_val(node, val);				   //更新该区间
+	pushup(y);
+	pushup(F(y)); //维护信息
+}
+void rever(int x, int len) //翻转区间
+{
+	int node = split(x, len), y = F(node); //找到该区间
+	if (tree[node].tag != TAGNONE) return; //如果已经有赋值标记就不用管了
+	change_rev(node); //翻转该区间
+	pushup(y);
+	pushup(F(y)); //维护信息
+}
+void eraser(int x, int len) //删除区间
+{
+	int node = split(x, len), y = F(node); //找到该区间
+	remove(node);
+	tree[y].ch[0] = 0; //删除该区间，子树清空
+	pushup(y);
+	pushup(F(y)); //维护信息
+}
+void insert(int k, int len) //插入区间
+{
+	for (int i = 1; i <= len; i++) cin >> a[i]; //输入区间
+	for (int i = 1; i <= len; i++) id[i] = rublish();
+	build(1, len, 0); //将输入的区间建成一个完全二叉树
+	int z = id[(1 + len) >> 1];
+	int x = kth(k + 1), y = kth(k + 2); //找到要插入的位置
+	Splay(x, 0) , Splay(y, x);
+	tree[z].fa = y;
+	tree[y].ch[0] = z; //将新建的子树插入树中
+	pushup(y);
+	pushup(x); //维护信息
+}
+signed main()
+{
+	cin >> n >> m;
+	tree[0].mid = a[1] = a[n + 2] = -inf; //边界
+	for (int i = 1 ; i <= n ; i ++) cin >> a[i + 1];
+	for (int i = 1; i <= n + 2; i ++) id[i] = i;
+	build(1, n + 2, 0); //建成一颗Splay
+	root = (n + 3) >> 1;
+	cnt = n + 2; //指根，更新点数
+	for (int i = 1 ; i <= m ; i ++)
+	{
+		string s;
+		int pos, len, y;
+		cin >> s;
+		if(s == "MAX-SUM") cout << tree[root].mid << '\n';
+		else
+		{
+			cin >> pos >> len;
+			if(s == "INSERT") insert(pos, len);
+			if(s == "DELETE") eraser(pos, len);
+			if(s == "MAKE-SAME")
+			{
+				cin >> y;
+				update(pos, len, y);
+			}
+			if(s == "REVERSE") rever(pos, len);
+			if(s == "GET-SUM") cout << query(pos, len) << '\n';
+		} 
+	}
+	return 0;
+}
+\end{lstlisting}
+
+\end{document}

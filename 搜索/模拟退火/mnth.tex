@@ -1,0 +1,45 @@
+\documentclass[E:/GsjzTle/main/main.tex]{subfiles}
+\begin{document}
+求费马点的例子，注意用真随机数。
+
+\begin{lstlisting}
+void solve()
+{
+	int i ;
+	point ans , next ;
+	point now ;
+	ans.x = (p[1].x + p[2].x + p[3].x) / 3 ;
+	ans.y = (p[1].y + p[2].y + p[3].y) / 3 ;
+	double t = 100  ;
+	double delta = 0.99 ;
+	double dE ;
+	double ans1 ;
+	double inf = 1000000000 ;
+	while(t > 1e-8)
+	{
+		ans1 = inf ;
+		for(i = 0 ; i < 4 ; i ++)
+		{
+			next.x = ans.x + row[i] * t ;
+			next.y = ans.y + col[i] * t ;
+			if(cal(next) < ans1)
+			{
+				ans1 = cal(next) ;
+				now = next ;
+			}		   	 
+		}
+		dE = cal(now) - cal(ans) ;
+		if(dE < 0.0 || exp(dE / t) > random1())
+		{
+			ans = now ;
+		}
+		t *= delta ;
+	}
+	printf("%.12f %.12f" , ans.x , ans.y) ;
+}
+
+
+\end{lstlisting}
+\end{document}
+
+

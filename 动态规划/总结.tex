@@ -1,0 +1,55 @@
+\documentclass[E:/GsjzTle/main/main.tex]{subfiles}
+\begin{document}
+
+关于决策：
+
+如：\(dp[i][j]\) 表示前 \(i\) 个数使用了 \(j\)
+个盒子，所能得到的最大价值
+
+\begin{itemize}
+\item
+  决策1：
+
+  \begin{itemize}
+  \item
+    第 \(i\) 个数选或不选
+  \item
+    选：\(dp[i][j] = dp[k][j - 1] + A[i]\)（\(k <i\)，\(A[i]\)
+    为所能获得的价值）
+  \item
+    不选：\(dp[i][j] = dp[i - 1][j]\)
+  \end{itemize}
+\item
+  决策2：
+
+  \begin{itemize}
+  \item
+    用 \(g[i][j]\) 表示前 \(i\) 个数使用了 \(j\)
+    个盒子，所能得到的最大价值（第\(i\)个数一定要选）
+  \item
+    \(dp[i][j]\) 表示前 \(i\) 个数使用了 \(j\)
+    个盒子，所能得到的最大价值(第 \(i\) 个数可选可不选)
+  \item
+    \(g[i][j] = Max(g[i-1][j],dp[i - 1][j - 1]) + A[i]\) \\
+    （ \(i\) 可以和 \(i-1\)放在一个盒子里，也可以单独放在一个新盒子里）
+  \item
+    \(dp[i][j] = Max(g[i][j],dp[i - 1][j])\)\\
+    （\(i\) 选了最优解就是 \(g[i][j]\) ，\(i\) 不选最优解就是
+    \(dp[i - 1][j]\))
+  \end{itemize}
+\end{itemize}
+
+关于定义：
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \(dp[i][j]\) 表示前 \(i\) 个数和为 \(j\) 的方案数
+\item
+  \(dp[i][j]\) 表示前 \(i\) 个数和不大于（不小于） \(j\) 的方案数
+\item
+  \(dp[i][j]\) 表示前 \(i\) 个数，数值小于 \(x\) 的数的个数为 \(j\)
+  的集合个数
+\end{enumerate}
+
+\end{document}
