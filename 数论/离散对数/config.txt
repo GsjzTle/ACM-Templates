@@ -1,2 +1,0 @@
-<BSGS> <BSGS.tex>
-<EX_BSGS> <EX_BSGS.tex>

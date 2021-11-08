@@ -1,3 +1,0 @@
-<tarjan离线> <tarjan离线.tex>
-<倍增法> <倍增法.tex>
-<树剖法> <树剖法.tex>

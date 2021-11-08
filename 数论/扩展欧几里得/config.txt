@@ -1,2 +1,0 @@
-<exgcd> <exgcd.tex>
-<求同余方程> <求同余方程.tex>
