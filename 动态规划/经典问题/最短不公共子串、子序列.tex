@@ -1,0 +1,121 @@
+\documentclass[E:/GsjzTle/main/main.tex]{subfiles}
+\begin{document}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \(a\) 的一个最短的子串，它不是 \(b\) 的子串。
+\item
+  \(a\) 的一个最短的子串，它不是 \(b\) 的子序列。
+\item
+  \(a\) 的一个最短的子序列，它不是 \(b\) 的子串。
+\item
+  \(a\) 的一个最短的子序列，它不是 \(b\) 的子序列。
+\end{enumerate}
+
+\begin{lstlisting}
+#include <bits/stdc++.h>
+#define maxn 4010
+using namespace std;
+char s1[maxn], s2[maxn];
+struct Automata
+{
+	int root, tot, las;
+	int len[maxn], ch[maxn][30], fa[maxn], last[30];
+	void clear_sam()
+	{
+		tot = las = root = 1;
+		memset(fa, 0, sizeof(fa));
+		memset(ch, 0, sizeof(ch));
+		memset(len, 0, sizeof(len));
+	}
+	void clear_seq()
+	{
+		root = 2010;
+		memset(ch, 0, sizeof(ch));
+		memset(last, 0, sizeof(last));
+	}
+	void insert(int c)
+	{
+		int p = las, np = las = ++tot;
+		len[np] = len[p] + 1;
+		while (p && !ch[p][c])
+		ch[p][c] = np, p = fa[p];
+		if (!p)
+		fa[np] = root;
+		else
+		{
+			int q = ch[p][c];
+			if (len[q] == len[p] + 1)
+			fa[np] = q;
+			else
+			{
+				int nq = ++tot;
+				memcpy(ch[nq], ch[q], sizeof(ch[q]));
+				len[nq] = len[p] + 1, fa[nq] = fa[q], fa[np] = fa[q] = nq;
+				while (ch[p][c] == q)
+				ch[p][c] = nq, p = fa[p];
+			}
+		}
+	}
+	void sam(char *s)
+	{
+		clear_sam();
+		int lenth = strlen(s + 1);
+		for (int i = 1; i <= lenth; ++i)
+		insert(s[i] - 'a' + 1);
+	}
+	void seq(char *s)
+	{
+		clear_seq();
+		int lenth = strlen(s + 1);
+		for (int i = lenth; i; --i)
+		{
+			for (int j = 1; j <= 26; ++j)
+			ch[i][j] = last[j];
+			last[s[i] - 'a' + 1] = i;
+		}
+		for (int i = 1; i <= 26; ++i)
+		ch[root][i] = last[i];
+	}
+} A, B;
+struct node
+{
+	int a, b, len;
+};
+bool vis[maxn][maxn];
+int query()
+{
+	memset(vis, 0, sizeof(vis));
+	queue<node> q;
+	q.push((node){A.root, B.root, 0});
+	vis[A.root][B.root] = true;
+	while (!q.empty())
+	{
+		node now = q.front();
+		q.pop();
+		for (int i = 1; i <= 26; ++i)
+		{
+			int a = A.ch[now.a][i], b = B.ch[now.b][i];
+			if (vis[a][b])
+			continue;
+			if (a && !b)
+			return now.len + 1;
+			vis[a][b] = true;
+			q.push((node){a, b, now.len + 1});
+		}
+	}
+	return -1;
+}
+int main()
+{
+	scanf("%s%s", s1 + 1, s2 + 1);
+	A.sam(s1), B.sam(s2), printf("%d\n", query());
+	A.sam(s1), B.seq(s2), printf("%d\n", query());
+	A.seq(s1), B.sam(s2), printf("%d\n", query());
+	A.seq(s1), B.seq(s2), printf("%d\n", query());
+	return 0;
+}
+\end{lstlisting}
+
+\end{document}

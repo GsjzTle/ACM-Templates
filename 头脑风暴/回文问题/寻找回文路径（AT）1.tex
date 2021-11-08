@@ -1,0 +1,114 @@
+\documentclass[E:/GsjzTle/main/main.tex]{subfiles}
+
+\begin{document}
+
+\textbf{problem：}
+
+\begin{quote}
+给定 \(N\) 个点 \(M\) 条边，每条边都对应一个小写字母
+
+问是否存在一条从 \(1\) 到 \(N\)
+的路径，使得路径上的字母构成的字符串为回文串
+
+\begin{itemize}
+\item
+  若存在则输出回文串的最短长度，若不存在则输出 \(-1\)
+\end{itemize}
+\end{quote}
+
+\textbf{solve}
+
+\begin{quote}
+考虑双向 \(bfs + dp\) （以 \(dp\) 来思考会好理解许多）\\
+从 \(1\) \textasciitilde{} \(n\) 的路径构成回文相当于：
+
+\begin{itemize}
+\item
+  从 \(1\) \textasciitilde{} \(i\) 的路径和从 \(i\) \textasciitilde{}
+  \(n\) 的路径构成回文
+\end{itemize}
+
+或
+
+\begin{itemize}
+\item
+  从 \(1\) \textasciitilde{} \(i\) 的路径和从 \(j\) \textasciitilde{}
+  \(n\) 的路径构成回文，其中 \(i、j\)相邻
+\end{itemize}
+
+于是可以定义 \(dp[i][j]\) 来判断从\(1\) 到 \(i\) 的路径和从 \(n\) 到
+\(j\) 的路径是否构成回文
+
+\begin{itemize}
+\item
+  \(dp[i][j] = 1\) 表示构成回文串
+\item
+  \(dp[i][j] = 0\) 表示不构成回文串
+\end{itemize}
+
+有点类似从两头一起出发往中间靠的区间 \(dp?\) \\
+起初一头在 \(1\) 号点，另一头在 \(N\) 号点\\
+起初 \(1\)\textasciitilde{}\(1\)
+之间没有路径，\(N\)\textasciitilde{}\(N\) 之间也没有路径\\
+所以初始化 \(dp[1][n] = 1\)，并把 \((1,n)\) 打包存入队列进行双向
+\(bfs\)\\
+在 \(bfs\) 的过程中：
+
+\begin{itemize}
+\item
+  当 \(i = j\) 或 \(i、j\) 相邻时更新答案
+\item
+  当 \(i\) 的相邻边和 \(j\) 的相邻边相同时，定义 \(i\) 的相邻节点为
+  \(ii\)，\(j\) 的相邻节点为 \(jj\)，那么可由 \(dp[i][j] = 1\) 推出
+  \(dp[ii][jj] = 1\)，然后把 \((ii,jj)\) 打包存入队列继续 \(bfs\)
+\end{itemize}
+\end{quote}
+
+\begin{lstlisting}
+	const int N = 1e3 + 10;
+	int n , m , mp[N][N] , dp[N][N]; 
+	vector<int>G[N][30]; 
+	signed main()
+	{
+		cin >> n >> m ;
+		for(int i = 1 ; i <= m ; i ++)
+		{
+			int u , v;
+			char ch;
+			cin >> u >> v >> ch;
+			G[u][ch - 'a'].push_back(v);
+			G[v][ch - 'a'].push_back(u);
+			mp[u][v] = mp[v][u] = 1;
+		}
+		int res = 1e9;
+		queue<pair<pair<int , int> , int>>que;
+		que.push(make_pair(make_pair(1 , n) , 0));
+		dp[1][n] = 1;
+		while(!que.empty())
+		{
+			pair<pair<int , int> , int>q = que.front();
+			que.pop();
+			int x = q.fi.fi , y = q.fi.se , z = q.se;
+			if(z > res) break ;
+			if(x == y) res = min(res , z);
+			if(mp[x][y]) res = min(res , z + 1);
+			for(int k = 0 ; k <= 25 ; k ++)
+			{
+				for(auto i : G[x][k])
+				{
+					for(auto j : G[y][k])
+					{
+						if(dp[i][j]) continue ;
+						dp[i][j] = 1;
+						que.push(make_pair(make_pair(i , j) , z + 2));
+					}
+				}
+			}
+		}
+		if(res == 1e9) res = -1;
+		cout << res << '\n';
+		return 0;
+	}
+\end{lstlisting}
+
+\end{document}

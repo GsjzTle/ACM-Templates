@@ -1,0 +1,44 @@
+\documentclass[E:/GsjzTle/main/main.tex]{subfiles}
+\begin{document}
+
+\begin{itemize}
+\item
+  本题求01背包的最佳方案数，那么定义两个数组：\(f[N],cnt[N]\)
+\item
+  \(f[i]\) 用来存储背包容积为 \(i\) 时的最佳方案的总价值，
+\item
+  \(cnt[i]\) 为背包容积为 \(i\) 时总价值为最佳的方案数
+\item
+  先初始化所有的 \(cnt[i]\) 为 \(1\)，因为背包里什么也不装也是一种方案
+\item
+  外层循环 \(n\) 次，每次读入新物品的 \(w,v\)
+\item
+  求出装新物品时的总价值，与不装新物品时作对比
+\item
+  如果装新物品的方案总价值更大，那么用 \(f[j−v]+wf[j−v]+w\) 来更新
+  \(f[j]\)，用 \(cnt[j−v]\) 更新 \(cnt[j]\)
+\item
+  如果总价值相等，那么最大价值的方案数就多了 \(cnt[j−v]\) 种
+\end{itemize}
+
+\begin{lstlisting}
+cin >> n >> V;
+
+rep(i , 0 , V) cnt[i] = 1;
+
+rep(i , 1 , n) cin >> w[i] >> v[i];
+
+rep(i , 1 , n) per(j , V , w[i])
+
+{
+
+	if(dp[j - w[i]] + v[i] > dp[j]) dp[j] = dp[j - w[i]] + v[i] , cnt[j] = cnt[j - w[i]];
+
+	else if(dp[j - w[i]] + v[i] == dp[j]) cnt[j] += cnt[j - w[i]] , cnt[j] %= MOD;
+
+}
+
+cout << cnt[V] << '\n';
+\end{lstlisting}
+
+\end{document}

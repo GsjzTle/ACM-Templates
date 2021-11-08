@@ -1,0 +1,93 @@
+\documentclass[E:/GsjzTle/main/main.tex]{subfiles}
+
+\begin{document}
+
+对于一个模意义下的一元二次方程：\(x^2 + bx + c = 0 (\bmod p)\)，其中
+\(p\) 是质数。\\
+每次给定一组 \(b,c,p\) (\(a = 1\))，问这个方程有没有整数解，有解输出
+\(Yes\)，无解输出 \(No\)
+
+\begin{itemize}
+\item
+  对于一般的二次同余方程\\
+  \(a x^{2}+b x+c=0(\bmod p)\)
+\item
+  可以通过配方化为下式：\\
+  \((2 a x+b)^{2}=b^{2}-4 a c(\bmod 4 a p)\)
+\item
+  设 \(X=2 a x+b(\bmod 4 a p)\)
+\item
+  解方程 \(X^{2}=b^{2}-4 a c(\bmod 4 a p)\)
+\item
+  可以先解出 \(X^{2}=b^{2}-4 a c(\bmod p)\) 的解，再去不断 \(+p\) 凑
+  \(4ap\)，但经过进一步讨论，发现 \(p>2\) 时
+  \(X^{2}=b^{2}-4 a c(\bmod p)\)
+  有解、\(X^{2}=b^{2}-4 a c(\bmod 4 a p)\) 一定有解（证明略）
+\item
+  当 \(p\) 为 \(2\) 时，直接特判
+\end{itemize}
+
+\begin{lstlisting}
+#include <bits/stdc++.h>
+#define ll long long
+using namespace std;
+ll pow_mod(ll a, ll i, ll n)
+{
+	if(!i) return 1 % n;
+	ll temp = pow_mod(a, i >> 1, n);
+	temp = temp * temp % n;
+	if(i & 1) temp = temp * a % n;
+	return temp;
+}
+ll modsqr(int a, int n)
+{
+	ll b, k, i, x;
+	if(n == 2) return a % n;
+	if(pow_mod(a, (n - 1) / 2, n) == 1)
+	{
+		if(n % 4 == 3) x = pow_mod(a, (n + 1) / 4, n);
+		else
+		{
+			for(b = 1; b = pow_mod(b, (n - 1) / 2, n), n == 1; b ++) ;
+			i = (n - 1) / 2 , k = 0;
+			do
+			{
+				i /= 2 , k /= 2;
+				if ((pow_mod(a, i, n) * (ll)pow_mod(b, k, n) + 1) % n == 0)
+				{
+					k += (n - 1) / 2;
+				}
+			} while (i % 2 == 0);
+			x = (pow_mod(a, (i - 1) / 2, n) * (ll)pow_mod(b, k / 2, n)) % n;
+		}
+		if(x * 2 > n) x = n - x;
+		return x;
+	}
+	if(a == 0) return 0;
+	return -1;
+}
+signed main()
+{
+	int T = 1;
+	cin >> T;
+	while (T--)
+	{
+		ll a = 1 , b, c , p;
+		cin >> b >> c >> p;
+		if (p == 2)
+		{
+			if (c % p == 0 || (a + b + c) % p == 0) puts("Yes");
+			else puts("No");
+			continue;
+		}
+		ll t = b * b - 4 * a * c;
+		t = (t % p + p) % p;
+		ll s = modsqr((ll)t, p);
+		bool flag = (s != -1);
+		puts(flag ? "Yes" : "No");
+	}
+	return 0;
+}
+\end{lstlisting}
+
+\end{document}

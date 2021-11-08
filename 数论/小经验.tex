@@ -1,0 +1,33 @@
+\documentclass[E:/GsjzTle/main/main.tex]{subfiles}
+
+\begin{document}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \begin{itemize}
+  \item
+    已知 \(C\)，求有多少对 \((A,B)\) 满足 \(A \times B = C\)
+  \item
+    答案为 \(C\) 的因子个数
+  \end{itemize}
+\item
+  \begin{itemize}
+  \item
+    已知 \(C,g\)，求有多少对 \((A,B)\) 满足
+    \(\begin{cases}\gcd \left( A,B\right) =g\\
+    A\times B=C\end{cases}\)
+  \item
+    可转换式子为
+    \(\dfrac{A}{g} \times \dfrac{B}{g} = \dfrac{C}{g^2}\)，那么
+    \(gcd(\dfrac{A}{g},\dfrac{B}{g}) = 1\)
+  \item
+    所以需要将 \(\dfrac{C}{g^2}\) 的某个质因子全部分给 \(\dfrac{A}{g}\)
+    或者全部分给 \(\dfrac{B}{g}\)
+  \item
+    那么答案就是 \(2^{P_{cnt}}\)，其中 \(P_{cnt}\) 表示
+    \(\dfrac{C}{g^2}\) 的质因子的个数
+  \end{itemize}
+\end{enumerate}
+
+\end{document}

@@ -1,0 +1,106 @@
+**题目大意**
+
+> 给你一个$n$个节点的树，求每个节点的"结实程度"
+>
+> 一个节点的结实程度定义为以该节点为根的子树里所有节点的编号从小到大排列后，相邻编号的平方和。
+
+**解题思路**
+
+>假设一个节点的子树中所有节点编号排序后构成的序列为$a1,a2,a3.....ak$ , 那么答案为$∑_{i=1}^{k-1}(a_{i+1}-a_{i})^{2}$
+>
+>因为每个数只会和它的前驱后继有关，所以我们可以开个$set$来维护每次添加一个数/每次删除一个数对当前答案的影响
+
+```text
+using namespace std;
+const int N = 3e5 + 10 , inf = 0x3f3f3f3f;
+struct Edge{
+	int nex , to;
+}edge[N << 1];
+int head[N] , TOT;
+void add_edge(int u , int v)
+{
+	edge[++ TOT].nex = head[u] ;
+	edge[TOT].to = v;
+	head[u] = TOT;
+}
+int hson[N] , dep[N] , sz[N] , HH;
+int n , ans[N] , now;
+set<int>se;
+void dfs(int u , int far)
+{
+	dep[u] = dep[far] + 1;
+	sz[u] = 1;
+	for(int i = head[u] ; i ; i = edge[i].nex)
+	{
+		int v = edge[i].to;
+		if(v == far) continue ;
+		dfs(v , u);
+		sz[u] += sz[v];
+		if(sz[v] > sz[hson[u]]) hson[u] = v;
+	}
+}
+void calc(int u , int far , int val)
+{
+	if(val == 1) 
+	{
+		auto it = se.upper_bound(u);
+		auto it1 = it , it2 = it;
+		it1 -- ;
+		int add = 0 , add1 = 0 , add2 = 0;
+		if(it1 != se.begin() && it2 != se.end()) add = *it2 - *it1;  
+		now -= add * add;
+		if(it1 != se.begin()) add1 = u - *it1;
+		if(it2 != se.end())   add2 = *it2 - u;
+		now += add1 * add1 + add2 * add2;
+ 		se.insert(u);
+	}
+	else if(val == -1)
+	{
+		se.erase(u);
+		auto it = se.upper_bound(u);
+		auto it1 = it , it2 = it;
+		it1 -- ;
+		int add = 0 , add1 = 0 , add2 = 0;
+		if(it1 != se.begin()) add1 = u - *it1;
+		if(it2 != se.end())   add2 = *it2 - u;
+		now -= add1 * add1 , now -= add2 * add2;
+		if(it1 != se.begin() && it2 != se.end()) add = *it2 - *it1;
+		now += add * add;
+	}
+	for(int i = head[u] ; i ; i = edge[i].nex)
+	{
+		int v = edge[i].to;
+		if(v == far || v == HH) continue ;
+		calc(v , u , val);
+	}
+}
+void dsu(int u , int far , int op)
+{
+	for(int i = head[u] ; i ; i = edge[i].nex)
+	{
+		int v = edge[i].to;
+		if(v == far || v == hson[u]) continue ;
+		dsu(v , u , 0);
+	}
+	if(hson[u]) dsu(hson[u] , u , 1) , HH = hson[u];
+	calc(u , far , 1);
+	ans[u] = now;
+	HH = 0;
+	if(!op) calc(u , far , -1) , now = 0;
+}
+signed main()
+{
+	cin >> n;
+	se.insert(-inf);
+	rep(i , 2 , n)
+	{
+		int x;
+		cin >> x;
+		add_edge(i , x) , add_edge(x , i);
+	}	
+	dfs(1 , 0);
+	dsu(1 , 0 , 0);
+	rep(i , 1 , n) cout << ans[i] << '\n';
+	return 0;
+}
+```

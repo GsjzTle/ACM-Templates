@@ -1,0 +1,62 @@
+\documentclass[E:/GsjzTle/main/main.tex]{subfiles}
+
+\begin{document}
+
+\begin{itemize}
+\item
+  求出有序整数对 \((x,y)\) 的个数，使得 \(1\le x,y\le n\) 且
+  \(\frac{x}{y}\) 可以表示为十进制有限小数。
+\item
+  \(1 \le n \le 10^{12}\)
+\end{itemize}
+
+对于一个有限小数，当分数为最简形式时分母只包含 2 、5
+两个质因子，所以我们可以用 \(\lfloor\frac{bc}{ac}\rfloor\)
+来表示任何一个有限小数（其中 \(a\) 为 \(2,5\) 两个质因子构成的数 , \(c\)
+为不包含 \(2,5\) 两个质因子的数 , \(b\) 随意）。\\
+于是这道题就可以枚举 \(c\)，那么
+\(\text { ans }=\sum_{c=1}^{n} \lfloor\frac{n}{c}\rfloor \times f\left(\lfloor\frac{n}{c}\rfloor\right)\)（其中
+\(\lfloor\dfrac{n}{c}\rfloor\) 为 \(b\)
+的取值范围，\(f(\lfloor\frac{n}{c}\rfloor)\)）为
+\([1,\lfloor\frac{n}{c}\rfloor]\) 内 \(a\) 的个数。\\
+不过值得注意的是这里的 \(c\) 是不包含 \(2,5\) 两个质因子的数 ,
+所以对于每个块我们要减去包含 \(2,5\) 两个质因子的数。实现起来也很简单 ,
+根据容斥原理减去块内 \(2\) 的倍数的数 , 再减去块内 \(5\) 的倍数的数 ,
+然后再加上块内 \(10\) 的倍数的数即可。\\
+至于 \(f(\lfloor\frac{n}{c}\rfloor)\) ，我们可以先用 \(log\)
+的复杂度求出所有 \(1\sim10^{12}\) 的所有 \(a\)，并记录 \(a\) 的个数\\
+因为随着 \(c\) 增大 \(f(\lfloor\frac{n}{c}\rfloor)\)
+是递减的，所以可以用单指针求出
+
+\begin{lstlisting}
+const int N = 3e5 + 10;
+int a[N] , m , now = 1; 
+int f(int x)
+{
+	while(a[now] > x && now ) now -- ;
+	return now ;
+}
+signed main()
+{
+	int n ;
+	cin >> n;
+	for(int i = 1 ; i <= n ; i *= 2)
+	for(int j = 1 ; j * i <= n ; j *= 5)
+	a[++ m] = i * j;
+	now = m;
+	sort(a + 1 , a + 1 + m);
+	int ans = 0;
+	for(int l = 1 , r ; l <= n ; l = r + 1)
+	{
+		r = n / (n / l);
+		int cnt1 = r - l + 1 , cnt10 = r / 10 - (l - 1) / 10;
+		int cnt2 = r / 2 - (l - 1) / 2 , cnt5 = r / 5 - (l - 1) / 5;
+		int sum = cnt1 - cnt2 - cnt5 + cnt10;
+		ans += sum * (n / l) * f(n / l);
+	}
+	cout << ans << '\n';
+	return 0;
+}
+\end{lstlisting}
+
+\end{document}

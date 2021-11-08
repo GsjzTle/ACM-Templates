@@ -1,0 +1,49 @@
+\documentclass[E:/GsjzTle/main/main.tex]{subfiles}
+
+\begin{document}
+	
+	\begin{itemize}
+		\item
+		不管是求最长上升子序列还是最长不下降子序列最好都用
+		\(upper\_bound\)，用 \(lower\_bound\) 求不下降子序列会出错。
+		\item
+		求 \(lis\)：
+		
+		\begin{enumerate}
+			\def\labelenumi{\arabic{enumi}.}
+			\item
+			\(N^2\) 的 \(dp\)
+			\item
+			贪心 \(+\) 二分
+			\item
+			权值树状数组 \(or\) 权值线段树
+		\end{enumerate}
+		\item
+		求 \(lis\) 方案数：\\
+		定义 \(len\) 表示最大 \(lis\) 长度，\(f[i]\) 表示以 \(i\) 为结尾的
+		\(lis\) 长度，\(cnt[i]\) 表示以 \(i\) 为结尾的 \(lis\) 个数，先预处理
+		\(f[i]\) 和 \(len\)\\
+		那么当 \(a[i] > a[j]~\&\&~f[i] = f[j] + 1\) 时，\(cnt[i] += cnt[j]\)\\
+		答案为 \(\sum_{i=1}^{n}cnt[i][f[i] == len]\)\\
+		如果要求方案数不重复的话，只要当 \(a[i] = a[j] \&\&f[i]=f[j]\)
+		时，令\(cnt[i] = 0\)或\(cnt[j] = 0\) 即可
+		\item
+		求具体方案：\\
+		和求方案数类似，先求出 \(f[i]\) 和 \(len\)
+		
+		\begin{enumerate}
+			\def\labelenumi{\arabic{enumi}.}
+			\item
+			定义 \(pre[i]\) 表示 \(i\) 的前驱，那么当 \(f[i] = f[j] + 1\)
+			时，\(pre[i] = j\)。
+			\item
+			从 \(f[now] = len\) 的位置开始，如果
+			\(f[i] = f[now]-1\&\&a[i] < a[now]\) 则
+			\(now = i\)，不断重复此步骤直到 \(f[now] = 1\)。
+		\end{enumerate}
+		\item
+		二维 \(lis\)：\\
+		先对第一维升序排序，再在排好序的序列上根据第二维求 \(lis\) 即可
+	\end{itemize}
+	
+\end{document}

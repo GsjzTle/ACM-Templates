@@ -1,0 +1,47 @@
+\documentclass[E:/GsjzTle/main/main.tex]{subfiles}
+\begin{document}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  关于 \textbf{\#define int long long}
+
+  \begin{quote}
+  \begin{itemize}
+  \item
+    注意当题目某个类型为 \textbf{unsigned int} 时，如果没有去掉
+    \textbf{\#define int longl ong}，就会导致 \textbf{unsigned int}
+    \(→\) \textbf{unsigned long long} 从而导致错误
+  \item
+    \textbf{\#define int long long} 后，\textbf{scanf} 和 \textbf{prinf}
+    需要改成 \textbf{\%lld}
+  \end{itemize}
+  \end{quote}
+\item
+  题目中有\textbf{单个字母}读入和\textbf{数字}读入时，千万别用
+  \(char - `0`\) 来代替数字，因为读入的数字可能\textbf{不是个位数}
+\item
+  注意是不是只建了\textbf{单向边}
+\item
+  题目是不是多组读入？
+\item
+  \(inf\) 是不是开得不够大或者太大了爆 \(long long\) ？
+\item
+  路径压缩的 \(find\) 和 按秩合并的 \(find\) 不同，别忘记修改！
+\item
+  检查除 \(void\) 类型的函数有没有\textbf{返回值}
+\item
+  一个数右移过多位再 \& 1 是无法得到准确值的 (int y = x
+  \textgreater\textgreater{} 65 \& 1，此时无法确定 \(y\) 是等于 \(0\)
+  还是 \(1\) )
+\item
+  \(reverse\) \(vector\) 注意判空 不然会 \(re\)
+\item
+  用位运算表示 \(2^n\) 注意加 \(1LL<<n\)
+\item
+  \(map.find\) 不会创建新元素，\(map[]\) 会，注意空间
+\item
+  涉及减法的时候取模时候要 \((+mod)\% mod\)
+\end{enumerate}
+
+\end{document}

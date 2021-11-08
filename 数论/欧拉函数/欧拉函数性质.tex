@@ -1,0 +1,32 @@
+\documentclass[E:/GsjzTle/main/main.tex]{subfiles}
+\begin{document}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \(\sum_{i=1}^{n-1}[gcd(i,n)=1] = \varphi(n)\)，定义式常用来加速运算。
+\item
+  当\(n > 2\)时，\(\varphi(n)\)是偶数。
+\item
+  若\(a,b\)互质，则\(\varphi(ab) = \varphi(a) * \varphi(b)\)。
+\item
+
+  若\(n \geqslant 1\)，\([1,n]\)中与\(n\)互质的数的和为\(max(1ll , n * \varphi(n) / 2)\)。
+\item
+  若\(p\)是质数，则\(\varphi(p)=p-1\)。
+\item
+
+  若\(p\)是质数，且\(p \mid n\)但\(p \nmid n\)，则\(\varphi(n) = \varphi(n/p) * (p-1)\)。
+\item
+  \(\sum_{d \mid n} \varphi(d) = n\)
+\item
+
+  \(\prod_{n=1}^{\infty}(1 - x^n) = \sum_{k=0}^{\infty}(-1)^{k}x^{\frac{k*(3k\pm 1)}{2}}\)
+\item
+  积性函数指对于所有互质的整数a和b有性质 \(f(ab)=f(a)f(b)\)的数论函数。
+\item
+  如果\(gcd(m,n)=d\)，那么
+  \(\varphi(m\times n) = \frac{\varphi(m) \times \varphi(n) \times d}{\varphi(d)}\)。
+\end{enumerate}
+
+\end{document}

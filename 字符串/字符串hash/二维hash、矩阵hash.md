@@ -1,0 +1,70 @@
++ 求最大 $GsT$ 正方形的边长
++ $GsT$ 正方形：旋转180°后和旋转前完全相同
+
+```text
+#define ll long long
+const int N = 3e2 + 10 , MOD = 1e9 + 9;
+const int A = 13331 , B = 131;
+int n , m , a[N][N];
+ll p1[N] , p2[N] , h1[N][N] , h2[N][N];
+ll get_hash1(int a , int b , int c , int d)
+{
+	int ans = (h1[c][d] - h1[a - 1][d] - h1[c][b - 1] + h1[a - 1][b - 1] + MOD) % MOD;
+	return ans * p1[n - a] % MOD * p2[m - b] % MOD;
+}
+ll get_hash2(int a , int b , int c , int d)
+{
+	int ans = (h2[a][b] - h2[c + 1][b] - h2[a][d + 1] + h2[c + 1][d + 1] + MOD) % MOD;
+	return ans * p1[c - 1] % MOD * p2[d - 1] % MOD;
+}
+void init()
+{
+	p1[0] = p2[0] = 1;
+	for(int i = 1 ; i <= N - 10 ; i ++) p1[i] = p1[i - 1] * A % MOD , p2[i] = p2[i - 1] * B % MOD;	
+}
+signed main()
+{
+	init(); 
+	cin >> n >> m;
+	for(int i = 1 ; i <= n ; i ++) for(int j = 1 ; j <= m ; j ++)
+	{
+		char ch;
+		cin >> ch;
+		if(ch == '1') a[i][j] = 1;
+	}
+	for(int i = 1 ; i <= n ; i ++) for(int j = 1 ; j <= m ; j ++) h1[i][j] = p1[i] * p2[j] * a[i][j] % MOD;
+	for(int i = 1 ; i <= n ; i ++) for(int j = 1 ; j <= m ; j ++) h2[i][j] = p1[n - i + 1] * p2[m - j + 1] * a[i][j] % MOD;
+	for(int i = 1 ; i <= n ; i ++) for(int j = 1 ; j <= m ; j ++) h1[i][j] = h1[i - 1][j] + h1[i][j - 1] - h1[i - 1][j - 1] + h1[i][j];
+	for(int i = n ; i >= 1 ; i --) for(int j = m ; j >= 1 ; j --) h2[i][j] = h2[i + 1][j] + h2[i][j + 1] - h2[i + 1][j + 1] + h2[i][j];
+	int res = -1;
+	for(int i = 1 ; i <= n ; i ++) for(int j = 1 ; j <= m ; j ++)
+	{ 
+		// (i,j) 作为正方形中点 
+		int l = 1 , r = min(min(i - 1 , n - i) , min(j - 1 , m - j));
+		while(l <= r)
+		{
+			int mid = l + r >> 1;
+			int x1 = i - mid , y1= j - mid , x2 = i + mid , y2 = j + mid; 
+			ll ha = get_hash1(x1 , y1 , x2 , y2);
+			ll he = get_hash2(x1 , y1 , x2 , y2);
+			if(ha == he) l = mid + 1 , res = max(res , 2 * mid + 1);
+			else r = mid - 1;
+		}
+		// (i-0.5,j-0.5) 作为正方形的中点 
+		l = 1 , r = min(min(i - 1 , n - i + 1) , min(j - 1 , m - j + 1));
+		while(l <= r)
+		{
+			int mid = l + r >> 1;
+			int x1 = i - 1 - mid + 1 , y1 = j - 1 - mid + 1 , x2 = i + mid - 1 , y2 = j + mid - 1;
+			ll ha = get_hash1(x1 , y1 , x2 , y2);
+			ll he = get_hash2(x1 , y1 , x2 , y2);
+			if(ha == he) l = mid + 1 , res = max(res , mid * 2);
+			else r = mid - 1;
+		}
+		
+	}
+	cout << res << '\n';
+	return 0;
+}
+```
+

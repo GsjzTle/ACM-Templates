@@ -1,0 +1,70 @@
+\documentclass[E:/GsjzTle/main/main.tex]{subfiles}
+\begin{document}
+
+\begin{lstlisting}
+// 注意初始化 root
+struct tree
+{
+	int ed;
+	tree *nex[10];
+	tree()
+	{
+		ed = 0;
+		for(int i = 0 ; i < 10 ; i ++) nex[i] = NULL;
+	}
+};
+tree *root;
+int inser(char a[])
+{
+	int flag = 0 , k;
+	tree *p = root;
+	int len = strlen(a);
+	for(int i = 0 ; i < len ; i ++)
+	{
+		k = a[i] - '0';
+		if(p -> nex[k] == NULL)
+		{
+			p -> nex[k] = new tree;
+			flag = 1;
+		}
+		p = p -> nex[k];
+		if(p -> ed) return 0;
+	}
+	p -> ed = 1;
+	if(!flag) return 0;
+	return 1;
+}
+void del(tree *root)
+{
+	for(int i = 0; i < 10 ; i ++)
+	{
+		if(root -> nex[i] != NULL) del(root -> nex[i]);
+	}
+	free(root);
+	return ;
+}
+char s[110];
+int main()
+{
+	int T = 1;
+	cin >> T;
+	while(T --)
+	{
+		int n;
+		cin >> n;
+		int flag = 1;
+		root = new tree();
+		while(n --)
+		{
+			cin >> s;
+			if(flag) flag = inser(s);
+		}
+		if(!flag) printf("NO\n");
+		else printf("YES\n");
+		del(root);
+	}
+	return 0;
+}
+\end{lstlisting}
+
+\end{document}

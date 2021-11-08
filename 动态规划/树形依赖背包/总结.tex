@@ -1,0 +1,94 @@
+\documentclass[E:/GsjzTle/main/main.tex]{subfiles}
+
+\begin{document}
+
+\begin{itemize}
+\item
+  \textbf{问题模型}：\\
+  有 \(N\)
+  个产品，每个产品都有对应的体积和价值。对于其中某些产品，需要购买了它的父产品（最多只会有一个）才能购买它，问可以获得的最大价值？
+\item
+  \textbf{模型分析：}\\
+  给有关系的产品连边，最后必然会生成一棵树或者一片森林\\
+  有个小技巧：设置一个虚点 \(0\)
+  成为所有树的根节点，那么森林就会化为一棵树了
+
+  而对于树来说有个很重要的性质：
+
+  \textbf{当回溯结束后，子树已经被遍历完并处理完了。所有的操作都是从叶子节点往上爬的！所以给
+  \(dp\) 数组的赋初值的时候，可以考虑从叶子节点下手 ！}
+
+  \begin{enumerate}
+  \def\labelenumi{\arabic{enumi}.}
+  \item
+    定义 \(dp_{u,i,j}\) 表示以 \(u\) 为根节点，从前 \(i\)
+    个子节点中，选择了 \(j\) 个子节点的最大价值。
+  \item
+    像\(01\)背包一样压缩空间，得到：\(dp_{u,j}\) 表示 \(u\)
+    为根节点，选择了 \(j\) 个子节点的最大价值。
+  \item
+    转移式为：\(dp_{u,j} = dp_{v,k} + dp_{u,j-k} + (u\rightarrow v\)
+    的边权\()\)
+  \item
+    转移式中的 \(k < j\) （因为得保证 \(u\) 一定被选择了，不过有些题目
+    \(k=j\) 也可，比如当 \(j\) 表示的是\textbf{叶子节点个数}的时候）
+  \item
+    若节点 \(u\) 有点权，则只需在初始化的时候令 \(dp_{u,1} = val_u\)
+    即可
+  \item
+    若要设置虚点 \(0\)（将森林化为树），则最后答案为
+    \(dp_{0,m+1}\)（多了一个节点 \(0\)）
+  \end{enumerate}
+\item
+  \textbf{树上背包也算是分组背包：}\\
+  分组背包：若干组物品，每组中的物品互相冲突（就是说每组中最多只能选一件物品），求最大价值简单来说就是把每个节点看成一个背包啦，它的容量就是以这个节点为根的子树大小，组数就是连接的儿子个数。
+
+  树上背包：每组都有很多选择，选一个，两个，三个，把这些选择当做组中的元素就好了，容易看出每组中只能选一个元素，比如你选择了选一个物品，就不可能同时选择选两个物品。
+\end{itemize}
+
+\begin{lstlisting}
+const int N = 3e2 + 10;
+struct Edge{
+	int nex , to;
+}edge[N << 1];
+int head[N] , TOT;
+void add_edge(int u , int v)
+{
+	edge[++ TOT].nex = head[u] ;
+	edge[TOT].to = v;
+	head[u] = TOT;
+}
+int n , m , dp[N][N] , s[N] , v[N] , sum = 0;
+int dfs(int u , int far)
+{
+	int sum = 1;
+	for(int i = head[u] ; i ; i = edge[i].nex)
+	{
+		int v = edge[i].to;
+		if(v == far) continue ;
+		sum += dfs(v , u);
+		for(int j = sum ; j >= 1 ; j --)
+		{
+			for(int k = 0 ; k <= j - 1 ; k ++) 
+			dp[u][j] = max(dp[u][j] , dp[u][j - k] + dp[v][k]); 
+		}
+	}
+	return sum;
+}
+signed main()
+{
+	cin >> n >> m;
+	for(int i = 1 ; i <= n ; i ++)
+	{
+		cin >> s[i] >> v[i];
+		dp[i][1] = v[i];
+		add_edge(i , s[i]);
+		add_edge(s[i] , i);
+	}
+	dfs(0 , 0);
+	cout << dp[0][m + 1] << '\n'; // 多了一个节点 0
+	return 0;
+}
+\end{lstlisting}
+
+\end{document}

@@ -1,0 +1,302 @@
+\documentclass[E:/GsjzTle/main/main.tex]{subfiles}
+\begin{document}
+
+\begin{itemize}
+\item
+  一个正整数 \(n\)
+  可以表示成若干个正整数之和，形如：\(n=n_1+n_2+…+n_k\)，其中
+  \(n_1≥n_2≥…≥n_k≥1\)
+\item
+  我们将这样的一种表示称为正整数 \(n\) 的一种划分(不考虑
+  \(n_1,n_2,...,n_k\)) 顺序
+\item
+  现在给定一个正整数 \(n\)，请你求出 \(n\) 共有多少种不同的划分方法
+\end{itemize}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  可以认为 \(1 \sim n\) 每个数都有无限个，于是可以转换题意为：\\
+  有 \(1\sim n\) 种物品，每种物品都有无限个，求背包容量为 \(n\)
+  时能有多少种装包方案\\
+  那么 \(f[n] += f[n - i],i∈[1 , n]\)
+\item
+  定义 \(f[n][m]\) 表示 \(n\) 划分成 \(m\) 个数的和的方案数\\
+  （ \(n = n_1+n_2+...+n_m\)，其中 \(n_i\) 可以为 \(0\)）\\
+  那么 ：\\
+  \(f[x][y] = f[x][y - 1] + f[x - i][y - 1] + f[x - 2\times i][y-1] + ...\)\\
+  \(f[x][y] = f[x][y - 1] + f[x - i][y]\) \\
+  又回到了完全背包。。。\\
+  如果题目要求 划分的 \(m\) 个数不能为 \(0\)（不能为空），那么也好办：\\
+  只要先让 \(m\) 个数都 \(+1\)，再把剩下的 \(n-m\) 个数分给 \(m\)
+  个就好，\(ans =f[n-m][m]\)
+\item
+  如果要求 \(n_1,n_2,...,n_k\) 互不相等\\
+  那么不难发现先出来的数的数量一定不会超过 \(O(\sqrt{n})\)，即
+  \(m = min(m , \sqrt{n})\)\\
+  复杂度为 \(O(n\sqrt{n})\)
+\item
+  如果 \(n_1,n_2,...,n_k\) 可以相等，但 \(n\)
+  又很大，就需要用到生成函数\&五边形定理了\\
+  复杂度为 \(O(n\sqrt{n})\)
+\item
+  如果 \(n_1,n_2,...,n_k\) 可以相等，但要求每个数出现的次数小于
+  \(k\)，那么还是得用上生成函数\&五边形定理，复杂度为 \(O(n\sqrt{n})\)
+\end{enumerate}
+
+\begin{itemize}
+\item
+  一：
+
+\begin{lstlisting}
+signed main()
+
+{
+
+	memset(f , 0 , sizeof(f));
+
+	cin >> n;
+
+	f[0] = 1;//一个都不选，那么就只有一种情况 
+
+	for(int i = 1 ; i <= n ; i ++)
+
+		for(int j = i ; j <= n ; j ++)
+
+			f[j] = (f[j] + f[j - i]) % mod;
+
+	cout << f[n] << '\n';
+
+	return 0;
+
+}
+\end{lstlisting}
+\item
+  二：
+
+\begin{lstlisting}
+signed main()
+
+{
+
+	int n , k;
+
+	cin >> n >> k;
+
+	memset(f , 0 , sizeof(f));
+
+	rep(i , 0 , n) f[0][i] = f[i][0] = f[i][1] = f[1][i] = 1; 
+
+	rep(i , 2 , n)
+
+	{
+
+		rep(j , 2 , k)
+
+		{
+
+			if(i >= j) f[i][j] = f[i][j - 1] + f[i - j][j];
+
+			else f[i][j] = f[i][j - 1];
+
+		}
+
+	}
+
+	if(n - k < 0) cout << 0 << '\n';
+
+	else cout << f[n - k][k] << '\n';
+
+	return 0;
+
+}
+\end{lstlisting}
+\item
+  三略
+\item
+  四：
+
+\begin{lstlisting}
+const int N = 1e5 + 8;
+
+const int mo = 1e9 + 7;
+
+int dp[N];
+
+signed main()
+
+{
+
+    int n = 1e5;
+
+    dp[0] = 1;
+
+    for (int i = 1; i <= n; ++i)
+
+    {
+
+        for (int j = 1, tmp = 1; i >= (3  * j * j - j) / 2 ; ++ j , tmp *= -1)
+
+        {
+
+            int x = (3 * j * j - j) / 2;
+
+            int y = (3 * j * j + j) / 2;
+
+            dp[i] = ((dp[i] + tmp * dp[i - x]) % mo + mo) % mo;
+
+            if (i >= y) dp[i] = ((dp[i] + tmp * dp[i - y]) % mo + mo) % mo;
+
+        }
+
+    }
+
+    int T = 1; cin >> T;
+
+    while (T--)
+
+    {
+
+        int n ; cin >> n;
+
+        cout << dp[n] << '\n';
+
+    }
+
+    return 0;
+
+}
+\end{lstlisting}
+\item
+  五：
+
+\begin{lstlisting}
+const int MOD = 1e9 + 7 ;
+
+const int MAXN = 100001;
+
+ll get_q(ll x)
+
+{
+
+	ll ans = 3 * x * x - x;
+
+	return ans/2;
+
+}
+
+ll Q[MAXN] , P[MAXN];
+
+void init()
+
+{
+
+	Q[0] = 0;
+
+	for(int i = 1 ; i < MAXN ; i ++)
+
+	{
+
+		if(i & 1) Q[i] = get_q(i/2+1);
+
+		else Q[i] = get_q(i/2*(-1));
+
+	}
+
+	P[0] = P[1] = 1;
+
+	for(int i = 2 ; i < MAXN ; i ++)
+
+	{
+
+		for(int j = 1 ; ; j ++)
+
+		{
+
+			if(Q[j] > i) break;
+
+			int t = j;
+
+			if(t & 1) t = t / 2 + 1;
+
+			else t = t / 2;
+
+			if(t & 1) P[i] = P[i] + P[i - Q[j]];
+
+			else P[i] = P[i] - P[i - Q[j]];
+
+			if(P[i] > MOD) P[i] = P[i]%MOD;
+
+			if(P[i] < 0) P[i] = P[i]+MOD;
+
+		//	P[i] = (P[i] % MOD + MOD) % MOD;  这样写容易超时 
+
+		}
+
+	}
+
+}
+
+ll solve(int n , int k)
+
+{
+
+	ll ans = 0;
+
+	for(int i = 0 ; ; i ++)
+
+	{
+
+		if(Q[i] * k > n) break;
+
+		int t = i;
+
+		if(t & 1) t = t / 2 + 1;
+
+		else t = t / 2;
+
+		if(t & 1) ans = ans - P[n - Q[i]*k];
+
+		else ans = ans + P[n - Q[i]*k];
+
+		if(ans > MOD) ans = ans % MOD;
+
+		if(ans < 0) ans = ans + MOD;
+
+	//	ans = (ans % MOD + MOD) % MOD;  // 这样写容易超时 
+
+	}
+
+	return ans;
+
+}
+
+signed main()
+
+{
+
+	init();
+
+	int T = 1;
+
+	cin >> T;
+
+	while(T --)
+
+	{
+
+		int n , k;
+
+		cin >> n >> k;
+
+		cout << solve(n , k) << '\n';
+
+	}
+
+	return 0;
+
+}
+\end{lstlisting}
+\end{itemize}
+
+\end{document}

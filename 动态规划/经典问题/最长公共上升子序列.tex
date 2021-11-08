@@ -1,0 +1,141 @@
+\documentclass[C:/Users/12748/Desktop/latex模板/main/main.tex]{subfiles}
+
+\begin{document}
+
+\begin{itemize}
+\item
+  设\(f[i][j]\) 表示在 \(a\) 的前 \(i\) 个数中取出，且以 \(b[j]\) 结尾的
+  \(LCIS\) 长度。
+
+  \begin{itemize}
+  \item
+    当 \(a[i] \ne b[j]\)时，我们不能选 \(a[i]\)（因为序列以 \(b[j]\)
+    结尾，所以 \(b[j]\) 必须选），答案为\(f[i-1][j]\)
+  \item
+    当 \(a[i] = b[j]\) 时，我们枚举 \(b\) 之前可能的结尾，检查能不能把
+    \(a[i]\)（即\(b[j]\)
+    ）加入，答案为\(\displaystyle \max_{a[i] > b[k]} \{f[i-1][k]+1\},\quad 0 \leq k < j\)
+  \item
+    最终答案为每一个可能为 \(b[j]\)
+    结尾的\texttt{LIS}长度的最大值，即\(\max \{f[n][j]\}  ,1 \leq i \leq m\)
+    复杂度 \(O(n^3)\)
+  \end{itemize}
+\item
+  然后我们考虑 \(f[i][j]\) 可以由哪些状态转移过来，设这些状态为
+  \(f[i][j]\) 的状态转移集合。
+
+  我们发现这个集合包含 \(f[x][y], 0 \le x < i, 0 \le y \le j\)。\\
+  考虑每次转移状态的时候这些状态的变化情况。\\
+  我们就可以发现，已经在状态转移集合里的状态，在 \(i\) 或 \(j\)
+  增加时不会离开集合。\\
+  于是开个变量 \(val\)，记录当前状态转移集合里的最大值，即
+  \(\max \{f[i-1][k], 0 \le k < j\}\)\\
+  在转移前面状态的同时维护后面状态的 \(val\) 即可。
+\end{itemize}
+
+\begin{lstlisting}
+// O(N^2)
+const int N = 5e3 + 10;
+int n , m , a[N] , b[N];
+int f[N][N] , pre[N][N] , ma;
+void show(int i , int j)
+{
+	if(!i) return ;
+	show(i - 1 , pre[i][j]);
+	if(pre[i][j] != j) cout << b[j] << " "; 
+	return;
+}
+pair<int , int> LCIS()
+{
+	rep(i , 1 , n)
+	{
+		int val = 0;
+		rep(j , 1 , m)
+		{
+			if(a[i] == b[j])
+			{
+				f[i][j] = f[i - 1][val] + 1;
+				pre[i][j] = val;
+			}
+			else
+			{
+				f[i][j] = f[i - 1][j];
+				pre[i][j] = j;
+			}
+			if(b[j] < a[i] && f[i][j] > f[i][val]) val = j;
+		}
+	}
+	int ma = 0;
+	rep(j , 0 , m) if(f[n][j] > f[n][ma]) ma = j; 
+	return make_pair(f[n][ma] , ma);
+}
+signed main()
+{
+	cin >> n;
+	rep(i , 1 , n) cin >> a[i];
+	cin >> m;
+	rep(i , 1 , m) cin >> b[i];
+	pair<int , int> res = LCIS();
+	cout << res.first << '\n';
+	show(n , res.second);
+	return 0 ;
+}
+\end{lstlisting}
+
+\begin{lstlisting}
+// O(N^3)
+const int N = 5e2 + 10;
+int n , m , a[N] , b[N];
+int f[N][N] , pre[N][N];
+int ans , now;
+vector<int>vec;
+signed main()
+{
+	cin >> n;
+	
+	rep(i , 1 , n) cin >> a[i];
+	
+	cin >> m;
+	
+	rep(i , 1 , m) cin >> b[i];
+	
+	a[0] = b[0] = -1;
+	
+	rep(i , 1 , n) rep(j , 1 , m) 
+	{
+		if(a[i] == b[j])
+		{
+			rep(k , 0 , j - 1)
+			{
+				if(a[i] > b[k] && f[i][j] < f[i - 1][k] + 1)
+				{
+					f[i][j] = f[i - 1][k] + 1;
+					pre[i][j] = k;
+				}
+			}
+		}
+		else
+		{
+			f[i][j] = f[i - 1][j];
+			pre[i][j] = pre[i - 1][j];
+		}
+	}
+	rep(j , 1 , m) if(ans < f[n][j])
+	{
+		ans = f[n][j];
+		now = j;
+	}
+	while(now)
+	{
+		vec.push_back(b[now]);
+		now = pre[n][now];
+	}
+	reverse(vec.begin() , vec.end());
+	cout << ans << '\n';
+	for(auto i : vec) cout << i << " ";
+	cout << '\n';
+	return 0;
+}
+\end{lstlisting}
+
+\end{document}

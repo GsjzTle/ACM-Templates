@@ -1,0 +1,202 @@
+\documentclass[E:/GsjzTle/main/main.tex]{subfiles}
+
+\begin{document}
+
+\begin{itemize}
+\item
+  \texttt{0\ l\ r} 把 \([l, r]\) 区间内的所有数全变成 \(0\)
+\item
+  \texttt{1\ l\ r} 把 \([l, r]\) 区间内的所有数全变成 \(1\)
+\item
+  \texttt{2\ l\ r} 把 \([l,r]\) 区间内的所有数全部取反，也就是说把所有的
+  \(0\) 变成 \(1\)，把所有的 \(1\) 变成 \(0\)
+\item
+  \texttt{3\ l\ r} 询问 \([l, r]\) 区间内总共有多少个 \(1\)
+\item
+  \texttt{4\ l\ r} 询问 \([l, r]\) 区间内最多有多少个连续的 \(1\)
+\end{itemize}
+
+\begin{lstlisting}
+#include <bits/stdc++.h>
+#define ll long long
+using namespace std;
+const int MAX_N = 2e5 + 50;
+
+int n, m, a[MAX_N];
+
+struct segment_tree
+{
+	int l, r;
+	int sum, lazy, rev, pre[2], suf[2], dat[2];
+	#define ls(rt) (rt << 1)
+	#define rs(rt) (rt << 1 | 1)
+} t[MAX_N << 2];
+void push_up(int rt)
+{
+	t[rt].sum = t[ls(rt)].sum + t[rs(rt)].sum;
+	for (int i = 0; i <= 1; i ++ )
+	{
+		t[rt].pre[i] = t[ls(rt)].pre[i];
+		if (i == 1 && t[ls(rt)].sum == (t[ls(rt)].r - t[ls(rt)].l + 1))
+		t[rt].pre[i] += t[rs(rt)].pre[i];
+		else if (i == 0 && t[ls(rt)].sum == 0)
+		t[rt].pre[i] += t[rs(rt)].pre[i];
+		
+		t[rt].suf[i] = t[rs(rt)].suf[i];
+		if (i == 1 && t[rs(rt)].sum == (t[rs(rt)].r - t[rs(rt)].l + 1))
+		t[rt].suf[i] += t[ls(rt)].suf[i];
+		else if (i == 0 && t[rs(rt)].sum == 0)
+		t[rt].suf[i] += t[ls(rt)].suf[i];
+		
+		t[rt].dat[i] = t[ls(rt)].suf[i] + t[rs(rt)].pre[i];
+		t[rt].dat[i] = max(t[rt].dat[i], t[ls(rt)].dat[i]);
+		t[rt].dat[i] = max(t[rt].dat[i], t[rs(rt)].dat[i]);
+		t[rt].dat[i] = max(t[rt].dat[i], t[rt].pre[i]);
+		t[rt].dat[i] = max(t[rt].dat[i], t[rt].suf[i]);
+	}
+}
+void push_down(int rt)
+{
+	if (t[rt].lazy != -1)
+	{
+		t[rt].rev = 0;
+		int v = t[rt].lazy;
+		
+		t[ls(rt)].sum = (t[ls(rt)].r - t[ls(rt)].l + 1) * v;
+		t[rs(rt)].sum = (t[rs(rt)].r - t[rs(rt)].l + 1) * v;
+		
+		t[ls(rt)].lazy = t[rs(rt)].lazy = v;
+		t[ls(rt)].rev = t[rs(rt)].rev = 0;
+		
+		t[ls(rt)].pre[v] = t[ls(rt)].suf[v] = t[ls(rt)].dat[v] = (t[ls(rt)].r - t[ls(rt)].l + 1);
+		t[ls(rt)].pre[v ^ 1] = t[ls(rt)].suf[v ^ 1] = t[ls(rt)].dat[v ^ 1] = 0;
+		
+		t[rs(rt)].pre[v] = t[rs(rt)].suf[v] = t[rs(rt)].dat[v] = (t[rs(rt)].r - t[rs(rt)].l + 1);
+		t[rs(rt)].pre[v ^ 1] = t[rs(rt)].suf[v ^ 1] = t[rs(rt)].dat[v ^ 1] = 0;
+		
+		t[rt].lazy = -1;
+	}
+	if (t[rt].rev)
+	{
+		t[ls(rt)].sum = (t[ls(rt)].r - t[ls(rt)].l + 1) - t[ls(rt)].sum;
+		t[rs(rt)].sum = (t[rs(rt)].r - t[rs(rt)].l + 1) - t[rs(rt)].sum;
+		if (t[ls(rt)].lazy != -1) t[ls(rt)].lazy ^= 1;
+		else t[ls(rt)].rev ^= 1;
+		if (t[rs(rt)].lazy != -1) t[rs(rt)].lazy ^= 1;
+		else t[rs(rt)].rev ^= 1;
+		
+		swap(t[ls(rt)].dat[0], t[ls(rt)].dat[1]);
+		swap(t[ls(rt)].suf[0], t[ls(rt)].suf[1]);
+		swap(t[ls(rt)].pre[0], t[ls(rt)].pre[1]);
+		
+		swap(t[rs(rt)].dat[0], t[rs(rt)].dat[1]);
+		swap(t[rs(rt)].suf[0], t[rs(rt)].suf[1]);
+		swap(t[rs(rt)].pre[0], t[rs(rt)].pre[1]);
+		
+		t[rt].rev = 0;
+	}
+	return;
+}
+void build (int rt, int l, int r)
+{
+	t[rt].l = l , t[rt].r = r , t[rt].lazy = -1;
+	if (l == r)
+	{
+		t[rt].sum = a[l];
+		t[rt].pre[a[l]] = t[rt].suf[a[l]] = t[rt].dat[a[l]] = 1;
+		return;
+	}
+	int mid = (l + r) >> 1;
+	build(ls(rt), l, mid);
+	build(rs(rt), mid + 1, r);
+	push_up(rt);
+}
+void update_range(int rt, int l, int r, int v)
+{
+	push_down(rt);
+	if (l <= t[rt].l && t[rt].r <= r)
+	{
+		if (v == 0 || v == 1)
+		{
+			t[rt].sum = (t[rt].r - t[rt].l + 1) * v;
+			t[rt].lazy = v;
+			t[rt].pre[v] = t[rt].suf[v] = t[rt].dat[v] = (t[rt].r - t[rt].l + 1);
+			t[rt].pre[v ^ 1] = t[rt].suf[v ^ 1] = t[rt].dat[v ^ 1] = 0;
+		}
+		else if (v == 2)
+		{
+			t[rt].sum = (t[rt].r - t[rt].l + 1) - t[rt].sum;
+			t[rt].rev ^= 1;
+			swap(t[rt].pre[0], t[rt].pre[1]);
+			swap(t[rt].suf[0], t[rt].suf[1]);
+			swap(t[rt].dat[0], t[rt].dat[1]);
+		}
+		return;
+	}
+	int mid = (t[rt].l + t[rt].r) >> 1;
+	if (l <= mid) update_range(ls(rt), l, r, v);
+	if (r > mid) update_range(rs(rt), l, r, v);
+	push_up(rt);
+}
+ll query_sum(int rt, int l, int r)
+{
+	if (l <= t[rt].l && t[rt].r <= r) return t[rt].sum;
+	push_down(rt);
+	int mid = (t[rt].l + t[rt].r) >> 1;
+	int ans = 0;
+	if (l <= mid) ans += query_sum(ls(rt), l, r);
+	if (r > mid) ans += query_sum(rs(rt), l, r);
+	return ans;
+}
+segment_tree query_len(int rt, int l, int r)
+{
+	if (l <= t[rt].l && t[rt].r <= r) return t[rt];
+	push_down(rt);
+	int mid = (t[rt].l + t[rt].r) >> 1;
+	if (r <= mid) return query_len(ls(rt), l, r);
+	if (l > mid) return query_len(rs(rt), l, r);
+	segment_tree t1 = query_len(ls(rt), l, r), t2 = query_len(rs(rt), l, r), t3;
+	t3.sum = t1.sum + t2.sum;
+	for (int i = 0; i <= 1; i ++ )
+	{
+		t3.pre[i] = t1.pre[i];
+		if (i == 1 && t1.sum == (t1.r - t1.l + 1))
+		t3.pre[i] += t2.pre[i];
+		else if (i == 0 && t1.sum == 0)
+		t3.pre[i] += t2.pre[i];
+		
+		t3.suf[i] = t2.suf[i];
+		if (i == 1 && t2.sum == (t2.r - t2.l + 1))
+		t3.suf[i] += t1.suf[i];
+		else if (i == 0 && t2.sum == 0)
+		t3.suf[i] += t1.suf[i];
+		
+		t3.dat[i] = t1.suf[i] + t2.pre[i];
+		t3.dat[i] = max(t3.dat[i], t1.dat[i]);
+		t3.dat[i] = max(t3.dat[i], t2.dat[i]);
+		t3.dat[i] = max(t3.dat[i], t3.pre[i]);
+		t3.dat[i] = max(t3.dat[i], t3.suf[i]);
+	}
+	return t3;
+}
+signed main()
+{
+	cin >> n >> m;
+	for (int i = 1; i <= n; i ++ ) cin >> a[i];
+	build(1, 1, n);
+	for (int i = 1; i <= m; i ++ )
+	{
+		int op , l , r;
+		cin >> op >> l >> r;
+		l ++ , r ++ ;  // 本题下标是从 0 开始的 
+		if (op == 0) update_range(1, l, r, 0);
+		if (op == 1) update_range(1, l, r, 1);
+		if (op == 2) update_range(1, l, r, 2);
+		if (op == 3) cout << query_sum(1, l, r) << '\n';
+		if (op == 4) cout << query_len(1, l, r).dat[1] << '\n';
+	}
+	return 0;
+}
+\end{lstlisting}
+
+\end{document}

@@ -1,0 +1,127 @@
+\documentclass[E:/GsjzTle/main/main.tex]{subfiles}
+
+\begin{document}
+
+已知 \(0<=x<=y<p,p=1e9+7\)，且有
+
+\begin{itemize}
+\item
+  \((x~+~y)=b~\bmod~p\)
+\item
+  \((x~\times~y)=c~\bmod~p\)
+\item
+  求解任意一对\(x,y\)，不存在输出\(−1 −1\)
+\end{itemize}
+
+由两式变化可得
+\((y-x)^{2}=\left(b^{2}-4 c+p\right) \% p\bmod p\)，那么可以应用二次剩余定理解得
+\(y−x\) 的值\\
+由题我们可以知道\((x+y)=b\) 或者 \((x+y)=b+p\)，那么直接求解即可。
+
+\begin{lstlisting}
+#include<bits/stdc++.h>
+#define ll long long
+using namespace std;
+const ll MOD = 1e9 + 7;
+ll ppow(ll a, ll b, ll mod)
+{
+	ll ret = 1;
+	a = a % mod;
+	while(b)
+	{
+		if(b & 1) ret = ret * a % mod;
+		a = a * a % mod;
+		b >>= 1;
+	}
+	return ret;
+}
+struct TT
+{
+	ll p, d;
+};
+ll w;
+TT mul_er(TT a, TT b, ll mod)
+{
+	TT ans;
+	ans.p = (a.p * b.p % mod + a.d * b.d % mod * w % mod) % mod;
+	ans.d = (a.p * b.d % mod + a.d * b.p % mod) % mod;
+	return ans;
+}
+TT power(TT a, ll b, ll mod)
+{
+	TT ret;
+	ret.p = 1, ret.d = 0;
+	while(b)
+	{
+		if(b & 1) ret = mul_er(ret, a, mod);
+		a = mul_er(a, a, mod);
+		b >>= 1;
+	}
+	return ret;
+}
+ll legendre(ll a, ll p)
+{
+	return ppow(a, (p - 1) >> 1, p);
+}
+ll modulo(ll a, ll mod)
+{
+	a %= mod;
+	if(a < 0) a += mod;
+	return a;
+}
+ll solve(ll n, ll p)    //x^2 = n mod p
+{
+	if(n == 0) return 0;
+	if(n == 1) return 1;
+	if(p == 2) return 1;
+	if(legendre(n, p) + 1 == p) return -1;  //无解
+	ll a = -1, t;
+	while(true)
+	{
+		a = rand() % p;
+		t = a * a - n;
+		w = modulo(t, p);
+		if(legendre(w, p) + 1 == p) break;
+	}
+	TT temp;
+	temp.p = a;
+	temp.d = 1;
+	TT ans = power(temp, (p + 1) >> 1, p);
+	return ans.p;
+}
+bool getans(ll sum, ll dec, ll &x, ll &y)
+{
+	if((sum + dec) % 2 == 0)
+	{
+		y = (sum + dec) / 2;
+		x = y - dec;
+		if(x >= 0 && x + y == sum && y < MOD) return true;
+		else return false;
+	}
+	else return false;
+}
+signed main()
+{
+	int T;
+	cin >> T;
+	while(T--)
+	{
+		ll b, c;
+		cin >> b >> c;
+		ll d = solve((b * b % MOD - 4 * c % MOD + MOD) % MOD, MOD);
+		if(d == -1)
+		{
+			cout << "-1 -1\n";
+			continue;
+		}
+		ll x, y;
+		if(getans(b, d, x, y)) cout << x << " " << y << '\n';
+		else if(getans(b + MOD, d, x, y)) cout << x << " " << y << '\n';
+		else if(getans(b, MOD - d, x, y)) cout << x << " " << y << '\n';
+		else if(getans(b + MOD, MOD - d, x, y)) cout << x << " " << y << '\n';
+	}
+	return 0;
+}
+\end{lstlisting}
+
+\end{document}

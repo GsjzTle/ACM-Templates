@@ -1,0 +1,25 @@
+\documentclass[E:/GsjzTle/main/main.tex]{subfiles}
+\begin{document}
+例子：
+
+\begin{enumerate}
+\item $n$个数得序列$a$中挑选$2$个数使$a[i]+a[j]\leq m \;(i < j)$的方案数。
+
+\begin{lstlisting}
+sort(a + 1 , a + n + 1) ;
+int l = 1 , r = n ;
+ll ans = 0 ; //方案数
+while(l < r)
+{
+	if(a[l] + a[r] <= m)  ans += r - l , l ++ ;
+	else  r -- ;
+}
+\end{lstlisting}
+\end{enumerate}
+
+
+
+
+\end{document}
+
+
