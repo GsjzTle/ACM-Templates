@@ -27,7 +27,7 @@ touch your.tex
 + Example
 
 ```tex
-\documentclass[../main.tex]{subfiles}  # your.tex as a subfile, pointing to main.tex
+\documentclass[../main.tex]{subfiles}  % your.tex as a subfile, pointing to main.tex
 
 \begin{document}
 
